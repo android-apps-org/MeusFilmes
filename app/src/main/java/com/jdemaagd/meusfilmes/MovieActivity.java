@@ -1,61 +1,152 @@
 package com.jdemaagd.meusfilmes;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.app.LoaderManager.LoaderCallbacks;
+import androidx.loader.content.AsyncTaskLoader;
+import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter.MovieAdapterOnClickHandler;
+import com.jdemaagd.meusfilmes.data.AppSettings;
 import com.jdemaagd.meusfilmes.models.Movie;
-import com.jdemaagd.meusfilmes.viewmodels.MovieViewModel;
+import com.jdemaagd.meusfilmes.network.JsonUtils;
+import com.jdemaagd.meusfilmes.network.UrlUtils;
 
-import java.util.ArrayList;
+import java.net.URL;
 import java.util.List;
 
-public class MovieActivity extends AppCompatActivity implements MovieAdapterOnClickHandler {
+public class MovieActivity extends AppCompatActivity implements
+        MovieAdapterOnClickHandler, LoaderCallbacks<List<Movie>> {
 
+    private static final String LOG_TAG = MovieActivity.class.getSimpleName();
+
+    private LoaderCallbacks<List<Movie>> mCallback;
+    private Context mContext;
+    private TextView mErrorMessageDisplay;
+    private ProgressBar mLoadingIndicator;
     private MovieAdapter mMovieAdapter;
-    private List<Movie> mMovies;
     private RecyclerView mRecyclerView;
-    private MovieViewModel mViewModel;
+
+    private static final int MOVIE_LOADER_ID = 0;
+    private static final String SORT_DESCRIPTOR = "Sort_Descriptor";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie);
 
+        mContext = MovieActivity.this;
+
         bindViews();
 
-        mMovies = new ArrayList<>();
-        mViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
+        int loaderId = MOVIE_LOADER_ID;
 
-        // TODO: TMDB API Client Service 
+        mCallback = MovieActivity.this;
 
-        mViewModel.getMovies().observe(this, movies -> {
-            mMovieAdapter.setData(movies);
-            mMovieAdapter.notifyDataSetChanged();
-        });
+        String sortDescriptor = AppSettings.getPopularitySortDescriptor(MovieActivity.this);
+        Bundle bundleForLoader = new Bundle();
+        bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
+
+        LoaderManager.getInstance(this).initLoader(loaderId, bundleForLoader, mCallback);
     }
 
-    private void bindViews() {
+    /**
+     * Instantiate and return a new Loader for the given ID
+     * @param id The ID whose loader is to be created
+     * @param loaderArgs Any arguments supplied by the caller
+     * @return Return a new Loader instance that is ready to start loading
+     */
+    @Override
+    public Loader<List<Movie>> onCreateLoader(int id, final Bundle loaderArgs) {
 
-        mRecyclerView = findViewById(R.id.rv_posters);
+        return new AsyncTaskLoader<List<Movie>>(this) {
+            List<Movie> mMovies = null;
 
-        GridLayoutManager layoutManager
-                = new GridLayoutManager(this, 3);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setHasFixedSize(false);
+            @Override
+            protected void onStartLoading() {
+                if (mMovies != null) {
+                    deliverResult(mMovies);
+                } else {
+                    mLoadingIndicator.setVisibility(View.VISIBLE);
+                    forceLoad();
+                }
+            }
 
-        mMovieAdapter = new MovieAdapter(this);
-        mRecyclerView.setAdapter(mMovieAdapter);
+            @Override
+            public List<Movie> loadInBackground() {
+
+                final String sortDescriptor = loaderArgs.getString(SORT_DESCRIPTOR);
+
+                try {
+                    URL moviesRequestUrl = UrlUtils.buildMoviesUrl(sortDescriptor);
+                    List<Movie> movies = JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
+
+                    return movies;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            public void deliverResult(List<Movie> movies) {
+                mMovies = movies;
+                super.deliverResult(movies);
+            }
+        };
+    }
+
+    /**
+     * Called when a previously created loader has finished its load
+     * @param loader The Loader that has finished
+     * @param movies The data generated by the Loader
+     */
+    @Override
+    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movies) {
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        mMovieAdapter.setPosters(movies);
+        if (null == movies) {
+            showErrorMessage();
+        } else {
+            showMovies();
+        }
+    }
+
+    /**
+     * Called when a previously created loader is being reset, and thus making its data unavailable
+     * The application should at this point remove any references it has to the Loader's data
+     * @param loader The Loader that is being reset
+     */
+    @Override
+    public void onLoaderReset(Loader<List<Movie>> loader) {
 
     }
 
+    /**
+     * This method is used when we are resetting data,
+     *   so that at one point in time during a refresh of our data,
+     *   you can see that there is no data showing
+     */
+    private void invalidateData() {
+        mMovieAdapter.setPosters(null);
+    }
+
+    /**
+     * This method is for responding to clicks from our list
+     * @param movie String describing weather details for a particular day
+     */
     @Override
     public void onClick(Movie movie) {
         Context context = this;
@@ -67,5 +158,73 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
 
         movieIntent.putExtras(bundle);
         startActivity(movieIntent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.sort_menu, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_popular) {
+            invalidateData();
+            String sortDescriptor = AppSettings.getPopularitySortDescriptor(mContext);
+            Bundle bundleForLoader = new Bundle();
+            bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
+            LoaderManager.getInstance(this).initLoader(MOVIE_LOADER_ID, bundleForLoader, mCallback);
+            return true;
+        }
+
+        if (id == R.id.action_top_rated) {
+            invalidateData();
+            String sortDescriptor = AppSettings.getTopRatedSortDescriptor(mContext);
+            Bundle bundleForLoader = new Bundle();
+            bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
+            LoaderManager.getInstance(this).initLoader(MOVIE_LOADER_ID, bundleForLoader, mCallback);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void bindViews() {
+        mRecyclerView = findViewById(R.id.rv_posters);
+        mErrorMessageDisplay = findViewById(R.id.tv_error_message);
+
+        GridLayoutManager layoutManager
+                = new GridLayoutManager(this, 3);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setHasFixedSize(false);
+
+        mMovieAdapter = new MovieAdapter(this);
+        mRecyclerView.setAdapter(mMovieAdapter);
+
+        mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
+    }
+
+    /**
+     * This method will make the error message visible and hide the weather View
+     * Since it is okay to redundantly set the visibility of a View,
+     *   we don't need to check whether each view is currently visible or invisible
+     */
+    private void showErrorMessage() {
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorMessageDisplay.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * This method will make the View for movies visible and hide the error message
+     * Since it is okay to redundantly set the visibility of a View,
+     *   we don't need to check whether each view is currently visible or invisible
+     */
+    private void showMovies() {
+        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.VISIBLE);
     }
 }
