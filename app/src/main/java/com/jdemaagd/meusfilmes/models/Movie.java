@@ -1,65 +1,43 @@
 package com.jdemaagd.meusfilmes.models;
 
-import androidx.annotation.NonNull;
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
+import java.io.Serializable;
 
-@Entity(tableName = "movie")
-public class Movie {
+public class Movie implements Serializable {
 
-    @PrimaryKey
-    @NonNull
-    @ColumnInfo(name = "id")
-    public int movieId;
+    // "w92", "w154", "w185", "w342", "w500", "w780",
+    private static final String POSTER_BASE_URL = "https://image.tmdb.org/t/p/w342";
 
-    @ColumnInfo(name = "backdrop_path")
-    public String backdropPath;
+    private int mMovieId;
+    private String mBackdropPath;
+    private int mDuration;
+    private double mPopularity;
+    private String mPosterPath;
+    private long mReleaseDate;
+    private String mSynopsis;
+    private double mUserRating;
+    private int mVoteCount;
 
-    @ColumnInfo(name = "runtime")
-    public int duration;
-
-    public double popularity;
-
-    @ColumnInfo(name = "poster_path")
-    public String posterPath;
-
-    @ColumnInfo(name = "release_date")
-    public long releaseDate;
-
-    @ColumnInfo(name = "overview")
-    public String synopsis;
-
-    @ColumnInfo(name = "vote_average")
-    public double userRating;
-
-    @ColumnInfo(name = "vote_count")
-    public int voteCount;
-
-
-    // Constructor for MainActivity to display list of movies via poster
-    @Ignore
     public Movie(int movieId, String backdropPath, String posterPath){
-        this.movieId = movieId;
-        this.backdropPath = backdropPath;
-        this.posterPath = posterPath;
+        this.mMovieId = movieId;
+        this.mBackdropPath = backdropPath;
+        this.mPosterPath = posterPath;
     }
 
-    // Constructor for Room/MovieDetailsActivity
     public Movie(int movieId, String backdropPath, int duration, double popularity, String posterPath, long releaseDate, String synopsis, double userRating, int voteCount){
-        this.movieId = movieId;
-        this.backdropPath = backdropPath;
-        this.duration = duration;
-        this.popularity = popularity;
-        this.posterPath = posterPath;
-        this.releaseDate = releaseDate;
-        this.synopsis = synopsis;
-        this.userRating = userRating;
-        this.voteCount = voteCount;
+        this.mMovieId = movieId;
+        this.mBackdropPath = backdropPath;
+        this.mDuration = duration;
+        this.mPopularity = popularity;
+        this.mPosterPath = posterPath;
+        this.mReleaseDate = releaseDate;
+        this.mSynopsis = synopsis;
+        this.mUserRating = userRating;
+        this.mVoteCount = voteCount;
     }
 
-    public int getMovieId() { return movieId; }
-    public String getPosterPath() { return posterPath; }
+    public int getMovieId() { return mMovieId; }
 
+    public String getPosterUrl() {
+        return POSTER_BASE_URL + mPosterPath;
+    }
 }
