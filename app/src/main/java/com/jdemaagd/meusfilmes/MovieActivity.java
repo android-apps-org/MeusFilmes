@@ -20,8 +20,12 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.facebook.stetho.DumperPluginsProvider;
+import com.facebook.stetho.Stetho;
+import com.facebook.stetho.dumpapp.DumperPlugin;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter.MovieAdapterOnClickHandler;
+import com.jdemaagd.meusfilmes.data.AppDatabase;
 import com.jdemaagd.meusfilmes.data.AppSettings;
 import com.jdemaagd.meusfilmes.databinding.ActivityMovieBinding;
 import com.jdemaagd.meusfilmes.models.Movie;
@@ -29,6 +33,7 @@ import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -38,6 +43,7 @@ public class MovieActivity extends AppCompatActivity implements
 
     private static final String LOG_TAG = MovieActivity.class.getSimpleName();
 
+    private AppDatabase mAppDatabase;
     private ActivityMovieBinding mBinding;
     private LoaderCallbacks<List<Movie>> mCallback;
     private Context mContext;
@@ -55,17 +61,27 @@ public class MovieActivity extends AppCompatActivity implements
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie);
         mBinding.setLifecycleOwner(this);
 
+        mAppDatabase = AppDatabase.getInstance(getApplicationContext());
+
         mContext = MovieActivity.this;
+
+        Stetho.initialize(
+                Stetho.newInitializerBuilder(mContext)
+                        .enableDumpapp(new DumperPluginsProvider() {
+                            @Override
+                            public Iterable<DumperPlugin> get() {
+                                return null;
+                            }
+                        })
+                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(mContext))
+                        .build());
+        // TODO: network inspection ??
 
         setViews();
 
         mCallback = MovieActivity.this;
 
-        String sortDescriptor = AppSettings.getPopularitySortDescriptor(mContext);
-        Bundle bundleForLoader = new Bundle();
-        bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
-
-        LoaderManager.getInstance(this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
+        initLoader(AppSettings.getFavoritesSortDescriptor(mContext));
     }
 
     /**
@@ -95,12 +111,17 @@ public class MovieActivity extends AppCompatActivity implements
 
                 final String sortDescriptor = loaderArgs.getString(SORT_DESCRIPTOR);
 
-                try {
-                    URL moviesRequestUrl = UrlUtils.buildMoviesUrl(sortDescriptor);
-                    return JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
+                if (sortDescriptor != "favorites") {
+                    try {
+                        URL moviesRequestUrl = UrlUtils.buildMoviesUrl(sortDescriptor);
+                        return JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                } else {
+                    List<Movie> favMovies = mAppDatabase.movieDao().getMovies();
+                    return favMovies;
                 }
             }
 
@@ -175,26 +196,22 @@ public class MovieActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
+        invalidateData();
+
+        if (id == R.id.action_favorites) {
+            initLoader(AppSettings.getFavoritesSortDescriptor(mContext));
+
+            return true;
+        }
+
         if (id == R.id.action_popular) {
-            invalidateData();
-
-            String sortDescriptor = AppSettings.getPopularitySortDescriptor(mContext);
-            Bundle bundleForLoader = new Bundle();
-            bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
-
-            LoaderManager.getInstance(MovieActivity.this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
+            initLoader(AppSettings.getPopularitySortDescriptor(mContext));
 
             return true;
         }
 
         if (id == R.id.action_top_rated) {
-            invalidateData();
-
-            String sortDescriptor = AppSettings.getTopRatedSortDescriptor(mContext);
-            Bundle bundleForLoader = new Bundle();
-            bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
-
-            LoaderManager.getInstance(MovieActivity.this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
+            initLoader(AppSettings.getTopRatedSortDescriptor(mContext));
 
             return true;
         }
@@ -243,6 +260,12 @@ public class MovieActivity extends AppCompatActivity implements
                 return 4;
             }
         }
+    }
+
+    private void initLoader(String sortDescriptor) {
+        Bundle bundleForLoader = new Bundle();
+        bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
+        LoaderManager.getInstance(this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
     }
 
     /**
