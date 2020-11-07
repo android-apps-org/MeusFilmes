@@ -16,6 +16,9 @@ import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
+    // "w92", "w154", "w185", "w342", "w500", "w780",
+    private static final String POSTER_BASE_URL = "https://image.tmdb.org/t/p/w342";
+
     private List<Movie> mMovies;
     private ImageView mPosterImageView;
 
@@ -92,7 +95,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     public void onBindViewHolder(MovieViewHolder movieViewHolder, int position) {
         Movie movie = mMovies.get(position);
         Picasso.get()
-                .load(movie.getPosterUrl())
+                .load(POSTER_BASE_URL + movie.getPosterPath())
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.error)
                 .into(mPosterImageView);
     }
 

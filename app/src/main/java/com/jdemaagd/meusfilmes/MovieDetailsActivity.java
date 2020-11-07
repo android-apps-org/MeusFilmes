@@ -2,6 +2,7 @@ package com.jdemaagd.meusfilmes;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -10,6 +11,7 @@ import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.loader.content.Loader;
 
+import com.jdemaagd.meusfilmes.data.AppDatabase;
 import com.jdemaagd.meusfilmes.databinding.ActivityDetailsMovieBinding;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
@@ -22,12 +24,17 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
 
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
 
+    private AppDatabase mAppDatabase;
     private ActivityDetailsMovieBinding mBinding;
     private LoaderCallbacks<Movie> mCallback;
+    private boolean mFavorite;
     private Movie mMovie;
     private int mMovieId;
 
     private static final int MOVIE_LOADER_ID = 1;
+
+    // "w92", "w154", "w185", "w342", "w500", "w780",
+    private static final String POSTER_BASE_URL = "https://image.tmdb.org/t/p/w342";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +49,13 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
             // mMovie = (Movie) movieBundle.getSerializable("MOVIE");
             mMovieId = intent.getIntExtra("MOVIE_ID", 0);
 
+            mFavorite = false;
             // TODO: reviews and trailers to view
             // ../id/reviews
             // ../id/videos
         }
+
+        mAppDatabase = AppDatabase.getInstance(getApplicationContext());
 
         int loaderId = MOVIE_LOADER_ID;
         mCallback = MovieDetailsActivity.this;
@@ -128,14 +138,32 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
 
     private void setViews() {
         mBinding.tvOriginalTitle.setText(mMovie.getOriginalTitle());
-        mBinding.tvReleaseYear.setText(mMovie.getReleaseYear());
+        mBinding.tvReleaseYear.setText(mMovie.getReleaseDate().substring(0, 4));
         mBinding.tvDuration.setText(mMovie.getDuration() + " mins");
-        mBinding.tvVoteAverage.setText(mMovie.getVoteAverage());
-        mBinding.tvOverview.setText(mMovie.getOverview());
+        mBinding.tvVoteAverage.setText(String.valueOf(mMovie.getUserRating()));
+        mBinding.tvOverview.setText(mMovie.getSynopsis());
+
+        Picasso.get()
+                .load(POSTER_BASE_URL + mMovie.getPosterPath())
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.error)
+                .into(mBinding.ivPosterThumb);
 
         mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
-        Picasso.get()
-                .load(mMovie.getPosterUrl())
-                .into(mBinding.ivPosterThumb);
+        mBinding.ivFavorite.setOnClickListener((view) -> {
+            if (mFavorite) {
+                mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
+            } else {
+                mBinding.ivFavorite.setImageResource(R.drawable.ic_star_yellow_24px);
+            }
+            mFavorite = !mFavorite;
+
+            onSaveAsFavorite();
+        });
+    }
+
+    private void onSaveAsFavorite() {
+        mAppDatabase.movieDao().addMovie(mMovie);
+        finish();
     }
 }
