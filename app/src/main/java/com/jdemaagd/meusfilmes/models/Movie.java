@@ -1,23 +1,45 @@
 package com.jdemaagd.meusfilmes.models;
 
-import java.io.Serializable;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 
-public class Movie implements Serializable {
+@Entity(tableName = "movie")
+public class Movie {
 
-    // "w92", "w154", "w185", "w342", "w500", "w780",
-    private static final String POSTER_BASE_URL = "https://image.tmdb.org/t/p/w342";
-
+    @PrimaryKey()
+    @ColumnInfo(name = "id")
     private int mMovieId;
+
+    @ColumnInfo(name = "backdrop_path")
     private String mBackdropPath;
+
+    @ColumnInfo(name = "duration")
     private int mDuration;
+
+    @ColumnInfo(name = "original_title")
     private String mOriginalTitle;
+
+    @ColumnInfo(name = "popularity")
     private double mPopularity;
+
+    @ColumnInfo(name = "poster_path")
     private String mPosterPath;
+
+    @ColumnInfo(name = "release_date")
     private String mReleaseDate;
+
+    @ColumnInfo(name = "synopsis")
     private String mSynopsis;
+
+    @ColumnInfo(name = "user_rating")
     private double mUserRating;
+
+    @ColumnInfo(name = "vote_count")
     private int mVoteCount;
 
+    @Ignore
     public Movie(int movieId, String backdropPath, double popularity, String posterPath, double userRating, int voteCount) {
         this.mMovieId = movieId;
         this.mBackdropPath = backdropPath;
@@ -41,20 +63,24 @@ public class Movie implements Serializable {
         this.mVoteCount = voteCount;
     }
 
-    public String getDuration() { return Integer.toString(mDuration); }
+    public String getBackdropPath() { return mBackdropPath; }
+
+    public int getDuration() { return mDuration; }
 
     public int getMovieId() { return mMovieId; }
 
     public String getOriginalTitle() { return mOriginalTitle; }
 
-    public String getOverview() { return mSynopsis; }
+    public double getPopularity() { return mPopularity; }
 
-    public String getPosterUrl() {
-        return POSTER_BASE_URL + mPosterPath;
-    }
+    public String getPosterPath() { return mPosterPath; }
 
-    public String getReleaseYear() { return mReleaseDate.substring(0, 4); }
+    public String getReleaseDate() { return mReleaseDate; }
 
-    public String getVoteAverage() { return mUserRating + " / 10"; }
+    public String getSynopsis() { return mSynopsis; }
+
+    public double getUserRating() { return mUserRating; }
+
+    public int getVoteCount() { return mVoteCount; }
 
 }

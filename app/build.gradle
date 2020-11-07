@@ -44,9 +44,11 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.3'
+    implementation 'androidx.core:core:1.2.0'
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation 'com.facebook.stetho:stetho:1.5.1'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
     testImplementation 'junit:junit:4.+'
