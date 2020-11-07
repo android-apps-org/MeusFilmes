@@ -18,15 +18,17 @@ public class Movie implements Serializable {
     private double mUserRating;
     private int mVoteCount;
 
-    public Movie(int movieId, String backdropPath, double popularity, String posterPath, double voteAverage){
+    public Movie(int movieId, String backdropPath, double popularity, String posterPath, double userRating, int voteCount) {
         this.mMovieId = movieId;
         this.mBackdropPath = backdropPath;
         this.mPopularity = popularity;
         this.mPosterPath = posterPath;
-        this.mUserRating = voteAverage;
+        this.mUserRating = userRating;
+        this.mVoteCount = voteCount;
     }
 
-    public Movie(int movieId, String backdropPath, int duration, String originalTitle, double popularity, String posterPath, String releaseDate, String synopsis, double userRating, int voteCount){
+    public Movie(int movieId, String backdropPath, int duration, String originalTitle, double popularity,
+                 String posterPath, String releaseDate, String synopsis, double userRating, int voteCount) {
         this.mMovieId = movieId;
         this.mBackdropPath = backdropPath;
         this.mDuration = duration;

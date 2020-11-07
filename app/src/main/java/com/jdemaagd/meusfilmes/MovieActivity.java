@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter.MovieAdapterOnClickHandler;
 import com.jdemaagd.meusfilmes.data.AppSettings;
+import com.jdemaagd.meusfilmes.databinding.ActivityMovieBinding;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
@@ -37,7 +38,7 @@ public class MovieActivity extends AppCompatActivity implements
 
     private static final String LOG_TAG = MovieActivity.class.getSimpleName();
 
-    //private ActivityMainBinding mBinding;
+    private ActivityMovieBinding mBinding;
     private LoaderCallbacks<List<Movie>> mCallback;
     private Context mContext;
     private TextView mErrorMessageDisplay;
@@ -51,21 +52,20 @@ public class MovieActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movie);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie);
+        mBinding.setLifecycleOwner(this);
 
         mContext = MovieActivity.this;
 
-        bindViews();
-
-        int loaderId = MOVIES_LOADER_ID;
+        setViews();
 
         mCallback = MovieActivity.this;
 
-        String sortDescriptor = AppSettings.getPopularitySortDescriptor(MovieActivity.this);
+        String sortDescriptor = AppSettings.getPopularitySortDescriptor(mContext);
         Bundle bundleForLoader = new Bundle();
         bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
 
-        LoaderManager.getInstance(this).initLoader(loaderId, bundleForLoader, mCallback);
+        LoaderManager.getInstance(this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
     }
 
     /**
@@ -182,7 +182,7 @@ public class MovieActivity extends AppCompatActivity implements
             Bundle bundleForLoader = new Bundle();
             bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
 
-            LoaderManager.getInstance(this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
+            LoaderManager.getInstance(MovieActivity.this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
 
             return true;
         }
@@ -194,7 +194,7 @@ public class MovieActivity extends AppCompatActivity implements
             Bundle bundleForLoader = new Bundle();
             bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
 
-            LoaderManager.getInstance(this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
+            LoaderManager.getInstance(MovieActivity.this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
 
             return true;
         }
@@ -202,9 +202,10 @@ public class MovieActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    private void bindViews() {
-        mRecyclerView = findViewById(R.id.rv_posters);
-        mErrorMessageDisplay = findViewById(R.id.tv_error_message);
+    private void setViews() {
+        mRecyclerView = mBinding.rvPosters;
+
+        mErrorMessageDisplay = mBinding.tvErrorMessage;
 
         GridLayoutManager layoutManager
                 = new GridLayoutManager(this, getColumnCount());
@@ -214,7 +215,10 @@ public class MovieActivity extends AppCompatActivity implements
         mMovieAdapter = new MovieAdapter(this);
         mRecyclerView.setAdapter(mMovieAdapter);
 
-        mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
+        // mBinding.swipeRefreshLayout.setEnabled(false);
+
+        mLoadingIndicator = mBinding.pbLoadingIndicator;
+
     }
 
     private int getColumnCount() {
@@ -232,11 +236,11 @@ public class MovieActivity extends AppCompatActivity implements
             }
         } else {
             if (width > 1700) {
-                return 5;
+                return 6;
             } else if (width > 1200) {
-                return 4;
+                return 5;
             } else {
-                return 3;
+                return 4;
             }
         }
     }

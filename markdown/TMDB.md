@@ -26,8 +26,6 @@
 
 ## Resources
 
-- [Picasso](https://github.com/square/picasso)
 - [MovieDB Status Codes](https://www.themoviedb.org/documentation/api/status-codes)
 - [URLConnection](https://developer.android.com/reference/java/net/URLConnection)
-- [Movies - YouTube](https://www.youtube.com/watch?v=OZXxQECTtFI)
 

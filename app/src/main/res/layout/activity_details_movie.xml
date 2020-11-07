@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<!-- https://developer.android.com/topic/libraries/data-binding -->
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/midnight_blue"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MovieDetailsActivity">
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="movie"
+            type="com.jdemaagd.meusfilmes.models.Movie" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="@color/midnight_blue"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MovieDetailsActivity">
 
     <TextView
         android:id="@+id/tv_original_title"
@@ -16,7 +25,8 @@
         android:paddingLeft="32dp"
         android:paddingRight="32dp"
         android:textColor="?attr/colorAccent"
-        android:textSize="26sp"
+        android:textSize="34sp"
+        android:fontFamily="sans-serif-smallcaps"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -37,6 +47,7 @@
         android:layout_marginStart="26dp"
         android:textColor="@color/light_blue"
         android:textSize="28dp"
+        android:fontFamily="sans-serif-medium"
         app:layout_constraintStart_toEndOf="@+id/iv_poster_thumb"
         app:layout_constraintTop_toTopOf="@+id/iv_poster_thumb" />
 
@@ -48,6 +59,7 @@
         android:layout_marginTop="16dp"
         android:textColor="@color/light_blue"
         android:textSize="22dp"
+        android:fontFamily="sans-serif-condensed-medium"
         app:layout_constraintStart_toEndOf="@+id/iv_poster_thumb"
         app:layout_constraintTop_toBottomOf="@+id/tv_release_year" />
 
@@ -59,6 +71,7 @@
         android:layout_marginTop="16dp"
         android:textColor="@color/light_blue"
         android:textSize="17dp"
+        android:fontFamily="sans-serif-light"
         app:layout_constraintStart_toEndOf="@+id/iv_poster_thumb"
         app:layout_constraintTop_toBottomOf="@+id/tv_duration" />
 
@@ -80,8 +93,11 @@
         android:paddingRight="16dp"
         android:textColor="@color/white"
         android:textSize="18sp"
+        android:fontFamily="sans-serif"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/iv_poster_thumb" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

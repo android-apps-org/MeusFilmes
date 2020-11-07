@@ -2,15 +2,15 @@ package com.jdemaagd.meusfilmes;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.loader.content.Loader;
 
+import com.jdemaagd.meusfilmes.databinding.ActivityDetailsMovieBinding;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
@@ -22,6 +22,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
 
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
 
+    private ActivityDetailsMovieBinding mBinding;
     private LoaderCallbacks<Movie> mCallback;
     private Movie mMovie;
     private int mMovieId;
@@ -31,7 +32,8 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_details_movie);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_details_movie);
+        mBinding.setLifecycleOwner(this);
 
         Intent intent = getIntent();
 
@@ -101,7 +103,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
             // showErrorMessage();
         } else {
             mMovie = movie;
-            bindViews();
+            setViews();
         }
     }
 
@@ -124,24 +126,16 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
 
     }
 
-    private void bindViews() {
-        TextView originalTitleTextView = findViewById(R.id.tv_original_title);
-        originalTitleTextView.setText(mMovie.getOriginalTitle());
-        TextView releaseYearTextView = findViewById(R.id.tv_release_year);
-        releaseYearTextView.setText(mMovie.getReleaseYear());
-        TextView durationTextView = findViewById(R.id.tv_duration);
-        durationTextView.setText(mMovie.getDuration() + " mins");
-        TextView voteAvgTextView = findViewById(R.id.tv_vote_average);
-        voteAvgTextView.setText(mMovie.getVoteAverage());
-        TextView overViewTextView = findViewById(R.id.tv_overview);
-        overViewTextView.setText(mMovie.getOverview());
+    private void setViews() {
+        mBinding.tvOriginalTitle.setText(mMovie.getOriginalTitle());
+        mBinding.tvReleaseYear.setText(mMovie.getReleaseYear());
+        mBinding.tvDuration.setText(mMovie.getDuration() + " mins");
+        mBinding.tvVoteAverage.setText(mMovie.getVoteAverage());
+        mBinding.tvOverview.setText(mMovie.getOverview());
 
-        ImageView posterImageView = findViewById(R.id.iv_poster_thumb);
+        mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
         Picasso.get()
                 .load(mMovie.getPosterUrl())
-                .into(posterImageView);
-
-        ImageView favoriteIcon = findViewById(R.id.iv_favorite);
-        favoriteIcon.setImageResource(R.drawable.ic_star_border_yellow_24px);
+                .into(mBinding.ivPosterThumb);
     }
 }
