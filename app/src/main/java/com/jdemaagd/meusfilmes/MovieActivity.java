@@ -1,6 +1,7 @@
 package com.jdemaagd.meusfilmes;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.AsyncTaskLoader;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,6 +23,7 @@ import android.widget.TextView;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter.MovieAdapterOnClickHandler;
 import com.jdemaagd.meusfilmes.data.AppSettings;
+import com.jdemaagd.meusfilmes.databinding.ActivityMovieBinding;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
@@ -28,11 +31,14 @@ import com.jdemaagd.meusfilmes.network.UrlUtils;
 import java.net.URL;
 import java.util.List;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
 public class MovieActivity extends AppCompatActivity implements
         MovieAdapterOnClickHandler, LoaderCallbacks<List<Movie>> {
 
     private static final String LOG_TAG = MovieActivity.class.getSimpleName();
 
+    private ActivityMovieBinding mBinding;
     private LoaderCallbacks<List<Movie>> mCallback;
     private Context mContext;
     private TextView mErrorMessageDisplay;
@@ -40,27 +46,26 @@ public class MovieActivity extends AppCompatActivity implements
     private MovieAdapter mMovieAdapter;
     private RecyclerView mRecyclerView;
 
-    private static final int MOVIE_LOADER_ID = 0;
+    private static final int MOVIES_LOADER_ID = 0;
     private static final String SORT_DESCRIPTOR = "Sort_Descriptor";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movie);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie);
+        mBinding.setLifecycleOwner(this);
 
         mContext = MovieActivity.this;
 
-        bindViews();
-
-        int loaderId = MOVIE_LOADER_ID;
+        setViews();
 
         mCallback = MovieActivity.this;
 
-        String sortDescriptor = AppSettings.getPopularitySortDescriptor(MovieActivity.this);
+        String sortDescriptor = AppSettings.getPopularitySortDescriptor(mContext);
         Bundle bundleForLoader = new Bundle();
         bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
 
-        LoaderManager.getInstance(this).initLoader(loaderId, bundleForLoader, mCallback);
+        LoaderManager.getInstance(this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
     }
 
     /**
@@ -92,9 +97,7 @@ public class MovieActivity extends AppCompatActivity implements
 
                 try {
                     URL moviesRequestUrl = UrlUtils.buildMoviesUrl(sortDescriptor);
-                    List<Movie> movies = JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
-
-                    return movies;
+                    return JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
@@ -174,38 +177,72 @@ public class MovieActivity extends AppCompatActivity implements
 
         if (id == R.id.action_popular) {
             invalidateData();
+
             String sortDescriptor = AppSettings.getPopularitySortDescriptor(mContext);
             Bundle bundleForLoader = new Bundle();
             bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
-            LoaderManager.getInstance(this).initLoader(MOVIE_LOADER_ID, bundleForLoader, mCallback);
+
+            LoaderManager.getInstance(MovieActivity.this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
+
             return true;
         }
 
         if (id == R.id.action_top_rated) {
             invalidateData();
+
             String sortDescriptor = AppSettings.getTopRatedSortDescriptor(mContext);
             Bundle bundleForLoader = new Bundle();
             bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
-            LoaderManager.getInstance(this).initLoader(MOVIE_LOADER_ID, bundleForLoader, mCallback);
+
+            LoaderManager.getInstance(MovieActivity.this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
+
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void bindViews() {
-        mRecyclerView = findViewById(R.id.rv_posters);
-        mErrorMessageDisplay = findViewById(R.id.tv_error_message);
+    private void setViews() {
+        mRecyclerView = mBinding.rvPosters;
+
+        mErrorMessageDisplay = mBinding.tvErrorMessage;
 
         GridLayoutManager layoutManager
-                = new GridLayoutManager(this, 3);
+                = new GridLayoutManager(this, getColumnCount());
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(false);
 
         mMovieAdapter = new MovieAdapter(this);
         mRecyclerView.setAdapter(mMovieAdapter);
 
-        mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
+        // mBinding.swipeRefreshLayout.setEnabled(false);
+
+        mLoadingIndicator = mBinding.pbLoadingIndicator;
+
+    }
+
+    private int getColumnCount() {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        // this.getDisplay().getRealMetrics(displayMetrics);
+        int width = displayMetrics.widthPixels;
+
+        if (getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
+            if (width > 1000) {
+                return 3;
+            } else {
+                return 2;
+            }
+        } else {
+            if (width > 1700) {
+                return 6;
+            } else if (width > 1200) {
+                return 5;
+            } else {
+                return 4;
+            }
+        }
     }
 
     /**

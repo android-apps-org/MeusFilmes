@@ -8,8 +8,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 import com.jdemaagd.meusfilmes.BuildConfig;
@@ -25,13 +23,37 @@ public final class UrlUtils {
     final static String API_PARAM = "api_key";
     final static String MOVIE_PATH_SEGMENT = "movie";
 
-    public static URL buildMoviesUrl(String descriptor) {
+    public static URL buildMovieUrl(int movieId) {
 
-        Uri.Builder uriBuilder = buildUpUri(descriptor);
+        Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
+                .appendPath(MOVIE_PATH_SEGMENT)
+                .appendPath(Integer.toString(movieId))
+                .appendQueryParameter(API_PARAM, API_KEY)
+                .build();
 
         URL url = null;
         try {
-            url = new URL(uriBuilder.toString());
+            url = new URL(builtUri.toString());
+        } catch(MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        Log.v(LOG_TAG, "Built URI " + url);
+
+        return url;
+    }
+
+    public static URL buildMoviesUrl(String descriptor) {
+
+        Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
+                .appendPath(MOVIE_PATH_SEGMENT)
+                .appendPath(descriptor)
+                .appendQueryParameter(API_PARAM, API_KEY)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
         } catch(MalformedURLException e) {
             e.printStackTrace();
         }
@@ -66,29 +88,6 @@ public final class UrlUtils {
         }
     }
 
-    private static Uri.Builder buildUpUri(String descriptor) {
-
-        List<String> pathSegments = buildUpUriPathSegments(descriptor);
-
-        Uri builtUri = Uri.parse(MOVIES_BASE_URL);
-        Uri.Builder uriBuilder = builtUri.buildUpon();
-
-        for (String pathSegment : pathSegments)
-            uriBuilder.appendPath(pathSegment);
-        uriBuilder.appendQueryParameter(API_PARAM, API_KEY);
-        uriBuilder.build();
-
-        return uriBuilder;
-    }
-
-    private static List<String> buildUpUriPathSegments(String descriptor) {
-        List<String> pathSegments = new ArrayList();
-
-        pathSegments.add(MOVIE_PATH_SEGMENT);
-        pathSegments.add(descriptor);
-
-        return pathSegments;
-
         /*
             Reviews:
             Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
@@ -109,5 +108,4 @@ public final class UrlUtils {
                 .build();
          */
 
-    }
 }
