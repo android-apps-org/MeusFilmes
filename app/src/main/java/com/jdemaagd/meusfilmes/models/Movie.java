@@ -10,23 +10,27 @@ public class Movie implements Serializable {
     private int mMovieId;
     private String mBackdropPath;
     private int mDuration;
+    private String mOriginalTitle;
     private double mPopularity;
     private String mPosterPath;
-    private long mReleaseDate;
+    private String mReleaseDate;
     private String mSynopsis;
     private double mUserRating;
     private int mVoteCount;
 
-    public Movie(int movieId, String backdropPath, String posterPath){
+    public Movie(int movieId, String backdropPath, double popularity, String posterPath, double voteAverage){
         this.mMovieId = movieId;
         this.mBackdropPath = backdropPath;
+        this.mPopularity = popularity;
         this.mPosterPath = posterPath;
+        this.mUserRating = voteAverage;
     }
 
-    public Movie(int movieId, String backdropPath, int duration, double popularity, String posterPath, long releaseDate, String synopsis, double userRating, int voteCount){
+    public Movie(int movieId, String backdropPath, int duration, String originalTitle, double popularity, String posterPath, String releaseDate, String synopsis, double userRating, int voteCount){
         this.mMovieId = movieId;
         this.mBackdropPath = backdropPath;
         this.mDuration = duration;
+        this.mOriginalTitle = originalTitle;
         this.mPopularity = popularity;
         this.mPosterPath = posterPath;
         this.mReleaseDate = releaseDate;
@@ -35,9 +39,20 @@ public class Movie implements Serializable {
         this.mVoteCount = voteCount;
     }
 
+    public String getDuration() { return Integer.toString(mDuration); }
+
     public int getMovieId() { return mMovieId; }
+
+    public String getOriginalTitle() { return mOriginalTitle; }
+
+    public String getOverview() { return mSynopsis; }
 
     public String getPosterUrl() {
         return POSTER_BASE_URL + mPosterPath;
     }
+
+    public String getReleaseYear() { return mReleaseDate.substring(0, 4); }
+
+    public String getVoteAverage() { return mUserRating + " / 10"; }
+
 }
