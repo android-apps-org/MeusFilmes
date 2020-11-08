@@ -40,13 +40,12 @@ public class Movie {
     private int mVoteCount;
 
     @Ignore
-    public Movie(int movieId, String backdropPath, double popularity, String posterPath, double userRating, int voteCount) {
+    public Movie(int movieId, String backdropPath, double popularity, String posterPath, double userRating) {
         this.mMovieId = movieId;
         this.mBackdropPath = backdropPath;
         this.mPopularity = popularity;
         this.mPosterPath = posterPath;
         this.mUserRating = userRating;
-        this.mVoteCount = voteCount;
     }
 
     public Movie(int movieId, String backdropPath, int duration, String originalTitle, double popularity,

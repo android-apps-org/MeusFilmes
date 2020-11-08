@@ -4,8 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.AsyncTaskLoader;
@@ -14,11 +17,13 @@ import androidx.loader.content.Loader;
 import com.jdemaagd.meusfilmes.data.AppDatabase;
 import com.jdemaagd.meusfilmes.databinding.ActivityDetailsMovieBinding;
 import com.jdemaagd.meusfilmes.models.Movie;
+import com.jdemaagd.meusfilmes.network.AppExecutor;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
+import java.util.List;
 
 public class MovieDetailsActivity extends AppCompatActivity implements LoaderCallbacks<Movie> {
 
@@ -127,6 +132,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
 
     }
 
+
     /**
      * This method is used when we are resetting data,
      *   so that at one point in time during a refresh of our data,
@@ -134,6 +140,40 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
      */
     private void invalidateData() {
 
+    }
+
+    private void onSaveAsFavorite() {
+//        final LiveData<Movie> movie = mAppDatabase.movieDao().getMovieById(mMovie.getMovieId());
+//        movie.observe(this, new Observer<Movie>() {
+//            @Override
+//            public void onChanged(@Nullable Movie movie) {
+//                Log.d(LOG_TAG, "Receiving database update from LiveData.");
+//                if (movie == null) {
+//                    mAppDatabase.movieDao().addMovie(mMovie);
+//                    finish();
+//                }
+//            }
+//        });
+        AppExecutor.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(LOG_TAG, "Receiving database update via Room.");
+                Movie movie = mAppDatabase.movieDao().getMovieById(mMovie.getMovieId());
+                if (movie == null) {
+                    mAppDatabase.movieDao().addMovie(mMovie);
+                    finish();
+                }
+            }
+        });
+    }
+
+    private void setFavoriteIcon() {
+        if (mFavorite) {
+            mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
+        } else {
+            mBinding.ivFavorite.setImageResource(R.drawable.ic_star_yellow_24px);
+        }
+        mFavorite = !mFavorite;
     }
 
     private void setViews() {
@@ -151,19 +191,8 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
 
         mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
         mBinding.ivFavorite.setOnClickListener((view) -> {
-            if (mFavorite) {
-                mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
-            } else {
-                mBinding.ivFavorite.setImageResource(R.drawable.ic_star_yellow_24px);
-            }
-            mFavorite = !mFavorite;
-
+            setFavoriteIcon();
             onSaveAsFavorite();
         });
-    }
-
-    private void onSaveAsFavorite() {
-        mAppDatabase.movieDao().addMovie(mMovie);
-        finish();
     }
 }
