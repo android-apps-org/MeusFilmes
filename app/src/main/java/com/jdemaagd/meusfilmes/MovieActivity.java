@@ -1,7 +1,10 @@
 package com.jdemaagd.meusfilmes;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.AsyncTaskLoader;
@@ -13,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,11 +33,11 @@ import com.jdemaagd.meusfilmes.data.AppDatabase;
 import com.jdemaagd.meusfilmes.data.AppSettings;
 import com.jdemaagd.meusfilmes.databinding.ActivityMovieBinding;
 import com.jdemaagd.meusfilmes.models.Movie;
+import com.jdemaagd.meusfilmes.network.AppExecutor;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -51,6 +55,7 @@ public class MovieActivity extends AppCompatActivity implements
     private ProgressBar mLoadingIndicator;
     private MovieAdapter mMovieAdapter;
     private RecyclerView mRecyclerView;
+    private String mSortDescriptor;
 
     private static final int MOVIES_LOADER_ID = 0;
     private static final String SORT_DESCRIPTOR = "Sort_Descriptor";
@@ -81,7 +86,9 @@ public class MovieActivity extends AppCompatActivity implements
 
         mCallback = MovieActivity.this;
 
-        initLoader(AppSettings.getFavoritesSortDescriptor(mContext));
+        mSortDescriptor = AppSettings.getTopRatedSortDescriptor(mContext);
+
+        initLoader(mSortDescriptor);
     }
 
     /**
@@ -109,19 +116,15 @@ public class MovieActivity extends AppCompatActivity implements
             @Override
             public List<Movie> loadInBackground() {
 
-                final String sortDescriptor = loaderArgs.getString(SORT_DESCRIPTOR);
+                String sortDescriptor = loaderArgs.getString(SORT_DESCRIPTOR);
 
-                if (sortDescriptor != "favorites") {
-                    try {
-                        URL moviesRequestUrl = UrlUtils.buildMoviesUrl(sortDescriptor);
-                        return JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                } else {
-                    List<Movie> favMovies = mAppDatabase.movieDao().getMovies();
-                    return favMovies;
+                try {
+                    URL moviesRequestUrl = UrlUtils.buildMoviesUrl(sortDescriptor);
+                    return JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
                 }
             }
 
@@ -140,12 +143,29 @@ public class MovieActivity extends AppCompatActivity implements
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movies) {
         mLoadingIndicator.setVisibility(View.INVISIBLE);
-        mMovieAdapter.setPosters(movies);
-        if (null == movies) {
-            showErrorMessage();
+
+        Log.d(LOG_TAG, "Loading Movies from API or Database base on sort selector.");
+
+        if (mSortDescriptor == "favorites") {
+            Log.d(LOG_TAG, "Actively retrieving movies from database.");
+            final LiveData<List<Movie>> favMovies = mAppDatabase.movieDao().getMovies();
+            favMovies.observe(this, new Observer<List<Movie>>() {
+                @Override
+                public void onChanged(@Nullable List<Movie> movies) {
+                    Log.d(LOG_TAG, "Receiving database update from LiveData.");
+                    mMovieAdapter.setPosters(movies);
+                }
+            });
         } else {
-            showMovies();
+            mMovieAdapter.setPosters(movies);
         }
+
+        showMovies();
+//        if (null == movies) {
+//            showErrorMessage();
+//        } else {
+//            showMovies();
+//        }
     }
 
     /**
@@ -199,19 +219,22 @@ public class MovieActivity extends AppCompatActivity implements
         invalidateData();
 
         if (id == R.id.action_favorites) {
-            initLoader(AppSettings.getFavoritesSortDescriptor(mContext));
+            mSortDescriptor = AppSettings.getFavoritesSortDescriptor(mContext);
+            initLoader(mSortDescriptor);
 
             return true;
         }
 
         if (id == R.id.action_popular) {
-            initLoader(AppSettings.getPopularitySortDescriptor(mContext));
+            mSortDescriptor = AppSettings.getPopularitySortDescriptor(mContext);
+            initLoader(mSortDescriptor);
 
             return true;
         }
 
         if (id == R.id.action_top_rated) {
-            initLoader(AppSettings.getTopRatedSortDescriptor(mContext));
+            mSortDescriptor = AppSettings.getTopRatedSortDescriptor(mContext);
+            initLoader(mSortDescriptor);
 
             return true;
         }

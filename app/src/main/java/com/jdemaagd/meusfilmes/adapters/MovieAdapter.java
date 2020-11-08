@@ -20,7 +20,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     private static final String POSTER_BASE_URL = "https://image.tmdb.org/t/p/w342";
 
     private List<Movie> mMovies;
-    private ImageView mPosterImageView;
 
     /*
      * An on-click handler to make it easy for an Activity to interface with RecyclerView
@@ -47,9 +46,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
      */
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        final ImageView mFavIcon;
+        final ImageView mPosterImageView;
+
         public MovieViewHolder(View view) {
             super(view);
             mPosterImageView = view.findViewById(R.id.iv_poster);
+            mFavIcon = view.findViewById(R.id.iv_fav_icon);
             view.setOnClickListener(this);
         }
 
@@ -98,7 +101,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                 .load(POSTER_BASE_URL + movie.getPosterPath())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error)
-                .into(mPosterImageView);
+                .into(movieViewHolder.mPosterImageView);
+
+        movieViewHolder.mFavIcon.setImageResource(R.drawable.ic_star_border_yellow_24px);
     }
 
     /**

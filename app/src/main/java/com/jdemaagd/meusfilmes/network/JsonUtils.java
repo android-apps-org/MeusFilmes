@@ -21,7 +21,6 @@ public final class JsonUtils {
     private static final String POPULARITY = "popularity";
     private static final String POSTER_PATH  = "poster_path";
     private static final String USER_RATING = "vote_average";
-    private static final String VOTE_COUNT = "vote_count";;
 
     public static List<Movie> getMoviesFromJson(String moviesJson) throws JSONException {
 
@@ -40,9 +39,8 @@ public final class JsonUtils {
             String posterPath = jsonMovie.getString(POSTER_PATH);
             String backdropPath = jsonMovie.getString(BACKDROP_PATH);
             double userRating = jsonMovie.getDouble(USER_RATING);
-            int voteCount = jsonMovie.getInt(VOTE_COUNT);
 
-            Movie movie = new Movie(movieId, backdropPath, popularity, posterPath, userRating, voteCount);
+            Movie movie = new Movie(movieId, backdropPath, popularity, posterPath, userRating);
 
             parsedMovies.add(movie);
         }
@@ -56,6 +54,7 @@ public final class JsonUtils {
         final String ORIGINAL_TITLE = "original_title";
         final String RELEASE_DATE = "release_date";
         final String SYNOPSIS = "overview";
+        final String VOTE_COUNT = "vote_count";
 
         JSONObject movieObj = new JSONObject(movieJson);
         int movieId = movieObj.getInt(MOVIE_ID);
