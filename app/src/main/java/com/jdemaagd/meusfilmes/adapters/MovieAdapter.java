@@ -103,7 +103,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                 .error(R.drawable.error)
                 .into(movieViewHolder.mPosterImageView);
 
-        movieViewHolder.mFavIcon.setImageResource(R.drawable.ic_star_border_yellow_24px);
+        if (movie.getIsFavorite()) {
+            movieViewHolder.mFavIcon.setImageResource(R.drawable.ic_star_border_yellow_24px);
+        }
+
+        if (movie.getIsFavorite()) {
+            movieViewHolder.mFavIcon.setImageResource(R.drawable.ic_star_yellow_24px);
+        } else {
+            movieViewHolder.mFavIcon.setImageResource(R.drawable.ic_star_border_yellow_24px);
+        }
     }
 
     /**

@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.AsyncTaskLoader;
@@ -20,6 +21,8 @@ import com.jdemaagd.meusfilmes.models.Movie;
 import com.jdemaagd.meusfilmes.network.AppExecutor;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
+import com.jdemaagd.meusfilmes.viewmodels.MovieDetailsViewModel;
+import com.jdemaagd.meusfilmes.viewmodels.ViewModelFactory;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
@@ -143,37 +146,30 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
     }
 
     private void onSaveAsFavorite() {
-//        final LiveData<Movie> movie = mAppDatabase.movieDao().getMovieById(mMovie.getMovieId());
-//        movie.observe(this, new Observer<Movie>() {
-//            @Override
-//            public void onChanged(@Nullable Movie movie) {
-//                Log.d(LOG_TAG, "Receiving database update from LiveData.");
-//                if (movie == null) {
-//                    mAppDatabase.movieDao().addMovie(mMovie);
-//                    finish();
-//                }
+        //final LiveData<Movie> movie = mAppDatabase.movieDao().getMovieById(mMovie.getMovieId());
+        //movie.observe(this, new Observer<Movie>() {
+//        ViewModelFactory factory = new ViewModelFactory(mAppDatabase, mMovieId);
+//        final MovieDetailsViewModel vm = new ViewModelProvider(this, factory).get(MovieDetailsViewModel.class);
+//        vm.getMovie().observe(this, (movie) -> {
+//            // vm.removeObserver(this);
+//            if (movie == null) {
+//                mAppDatabase.movieDao().addMovie(mMovie);
+//                finish();
 //            }
 //        });
+
         AppExecutor.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
                 Log.d(LOG_TAG, "Receiving database update via Room.");
-                Movie movie = mAppDatabase.movieDao().getMovieById(mMovie.getMovieId());
+                Movie movie = mAppDatabase.movieDao().getMovieById(mMovieId);
                 if (movie == null) {
+                    mMovie.setIsFavorite(true);
                     mAppDatabase.movieDao().addMovie(mMovie);
                     finish();
                 }
             }
         });
-    }
-
-    private void setFavoriteIcon() {
-        if (mFavorite) {
-            mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
-        } else {
-            mBinding.ivFavorite.setImageResource(R.drawable.ic_star_yellow_24px);
-        }
-        mFavorite = !mFavorite;
     }
 
     private void setViews() {
@@ -190,8 +186,14 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
                 .into(mBinding.ivPosterThumb);
 
         mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
+
         mBinding.ivFavorite.setOnClickListener((view) -> {
-            setFavoriteIcon();
+            if (mFavorite) {
+                mBinding.ivFavorite.setImageResource(R.drawable.ic_star_yellow_24px);
+            } else {
+                mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
+            }
+            mFavorite = !mFavorite;
             onSaveAsFavorite();
         });
     }
