@@ -6,21 +6,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 // Note: final modifier since class does not extend any other classes
 public final class JsonUtils {
 
+    private static final String LOG_TAG = JsonUtils.class.getSimpleName();
+
     private static final String MOVIE_ID = "id";
     private static final String BACKDROP_PATH = "backdrop_path";
-    private static final String POPULARITY = "popularity";
     private static final String POSTER_PATH  = "poster_path";
-    private static final String USER_RATING = "vote_average";
 
     public static List<Movie> getMoviesFromJson(String moviesJson) throws JSONException {
 
@@ -35,12 +31,10 @@ public final class JsonUtils {
             JSONObject jsonMovie = moviesArray.getJSONObject(i);
 
             int movieId = jsonMovie.getInt(MOVIE_ID);
-            double popularity = jsonMovie.getDouble(POPULARITY);
             String posterPath = jsonMovie.getString(POSTER_PATH);
             String backdropPath = jsonMovie.getString(BACKDROP_PATH);
-            double userRating = jsonMovie.getDouble(USER_RATING);
 
-            Movie movie = new Movie(movieId, backdropPath, popularity, posterPath, userRating);
+            Movie movie = new Movie(movieId, backdropPath, false, posterPath);
 
             parsedMovies.add(movie);
         }
@@ -52,8 +46,10 @@ public final class JsonUtils {
 
         final String DURATION = "runtime";
         final String ORIGINAL_TITLE = "original_title";
+        final String POPULARITY = "popularity";
         final String RELEASE_DATE = "release_date";
         final String SYNOPSIS = "overview";
+        final String USER_RATING = "vote_average";
         final String VOTE_COUNT = "vote_count";
 
         JSONObject movieObj = new JSONObject(movieJson);
@@ -68,7 +64,19 @@ public final class JsonUtils {
         double userRating = movieObj.getDouble(USER_RATING);
         int voteCount = movieObj.getInt(VOTE_COUNT);
 
-        return new Movie(movieId, backdropPath, duration, originalTitle,
+        boolean isFavorite = false;
+
+        return new Movie(movieId, backdropPath, duration, isFavorite, originalTitle,
                 popularity, posterPath, releaseDate, synopsis, userRating, voteCount);
+    }
+
+    private static Movie getFavoriteMovie(List<Movie> favMovies, int movieId) {
+
+        for (Movie movie : favMovies) {
+            if (movie.getMovieId() == movieId)
+                return movie;
+        }
+
+        return null;
     }
 }

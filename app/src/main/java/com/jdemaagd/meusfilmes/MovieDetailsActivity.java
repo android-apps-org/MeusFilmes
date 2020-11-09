@@ -3,12 +3,12 @@ package com.jdemaagd.meusfilmes;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.AsyncTaskLoader;
@@ -23,7 +23,6 @@ import com.jdemaagd.meusfilmes.network.UrlUtils;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
-import java.util.List;
 
 public class MovieDetailsActivity extends AppCompatActivity implements LoaderCallbacks<Movie> {
 
@@ -115,7 +114,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
     @Override
     public void onLoadFinished(Loader<Movie> loader, Movie movie) {
         if (null == movie) {
-            // showErrorMessage();
+            showErrorMessage();
         } else {
             mMovie = movie;
             setViews();
@@ -132,48 +131,37 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
 
     }
 
+    private void bindFavIcon() {
+        mBinding.ivFavorite.setOnClickListener((view) -> {
+            AppExecutor.getInstance().diskIO().execute(() -> {
+                if (mFavorite) {
+                    Log.d(LOG_TAG, "Remove movie from database via Room.");
+                    mAppDatabase.movieDao().removeMovie(mMovie);
+                } else {
+                    Log.d(LOG_TAG, "Insert movie into database via Room.");
+                    mAppDatabase.movieDao().addMovie(mMovie);
+                }
+                runOnUiThread(() -> setFavIcon());
+            });
+        });
+    }
 
-    /**
-     * This method is used when we are resetting data,
-     *   so that at one point in time during a refresh of our data,
-     *   you can see that there is no data showing
-     */
     private void invalidateData() {
 
     }
 
-    private void onSaveAsFavorite() {
-//        final LiveData<Movie> movie = mAppDatabase.movieDao().getMovieById(mMovie.getMovieId());
-//        movie.observe(this, new Observer<Movie>() {
-//            @Override
-//            public void onChanged(@Nullable Movie movie) {
-//                Log.d(LOG_TAG, "Receiving database update from LiveData.");
-//                if (movie == null) {
-//                    mAppDatabase.movieDao().addMovie(mMovie);
-//                    finish();
-//                }
-//            }
-//        });
-        AppExecutor.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(LOG_TAG, "Receiving database update via Room.");
-                Movie movie = mAppDatabase.movieDao().getMovieById(mMovie.getMovieId());
-                if (movie == null) {
-                    mAppDatabase.movieDao().addMovie(mMovie);
-                    finish();
-                }
+    private void setFavIcon() {
+        AppExecutor.getInstance().diskIO().execute(() -> {
+            final Movie movie = mAppDatabase.movieDao().getMovieById(mMovie.getMovieId());
+
+            if (movie == null) {
+                mFavorite = false;
+                mBinding.ivFavorite.setImageResource(R.drawable.ic_heart_border_pink_24dp);
+            } else {
+                mFavorite = true;
+                mBinding.ivFavorite.setImageResource(R.drawable.ic_heart_pink_24dp);
             }
         });
-    }
-
-    private void setFavoriteIcon() {
-        if (mFavorite) {
-            mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
-        } else {
-            mBinding.ivFavorite.setImageResource(R.drawable.ic_star_yellow_24px);
-        }
-        mFavorite = !mFavorite;
     }
 
     private void setViews() {
@@ -188,11 +176,19 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error)
                 .into(mBinding.ivPosterThumb);
+        bindFavIcon();
+        setFavIcon();
+    }
 
-        mBinding.ivFavorite.setImageResource(R.drawable.ic_star_border_yellow_24px);
-        mBinding.ivFavorite.setOnClickListener((view) -> {
-            setFavoriteIcon();
-            onSaveAsFavorite();
-        });
+    private void showErrorMessage() {
+        mBinding.ivFavorite.setVisibility(View.INVISIBLE);
+        mBinding.ivPosterThumb.setVisibility(View.INVISIBLE);
+        mBinding.tvDuration.setVisibility(View.INVISIBLE);
+        mBinding.tvOriginalTitle.setVisibility(View.INVISIBLE);
+        mBinding.tvOverview.setVisibility(View.INVISIBLE);
+        mBinding.tvReleaseYear.setVisibility(View.INVISIBLE);
+        mBinding.tvVoteAverage.setVisibility(View.INVISIBLE);
+
+        mBinding.tvErrorMessage.setVisibility(View.VISIBLE);
     }
 }
