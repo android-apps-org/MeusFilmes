@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,7 +29,6 @@ import com.jdemaagd.meusfilmes.decorator.GridItemDecorator;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
-import com.jdemaagd.meusfilmes.viewmodels.MovieViewModel;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -41,10 +39,6 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 public class MovieActivity extends AppCompatActivity implements MovieAdapterOnClickHandler {
 
     private static final String LOG_TAG = MovieActivity.class.getSimpleName();
-
-    private static final String SORT_FAVORITE = "favorite";
-    private static final String SORT_POPULAR = "popular";
-    private static final String SORT_TOP_RATED = "top_rated";
 
     private ActivityMovieBinding mBinding;
     private TextView mErrorMessageDisplay;
@@ -65,7 +59,7 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
         mMovies = new ArrayList<>();
         mSortDescriptor = AppSettings.getPopularitySortDescriptor(this);
 
-        setupViewModel();
+        loadMovies();
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, List<Movie>> {
@@ -136,21 +130,30 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
 
         mMovies.clear();
 
-        if (id == R.id.action_favorites && !mSortDescriptor.equals(SORT_FAVORITE)) {
-            mSortDescriptor = SORT_FAVORITE;
-            loadMovies();
+        if (id == R.id.action_favorites) {
+            String favoritesSort = AppSettings.getFavoritesSortDescriptor(this);
+            if (!mSortDescriptor.equals(favoritesSort)) {
+                mSortDescriptor = favoritesSort;
+                loadMovies();
+            }
             return true;
         }
 
-        if (id == R.id.action_popular && !mSortDescriptor.equals(SORT_POPULAR)) {
-            mSortDescriptor = SORT_POPULAR;
-            loadMovies();
+        if (id == R.id.action_popular) {
+            String popularSort = AppSettings.getPopularitySortDescriptor(this);
+            if (!mSortDescriptor.equals(popularSort)) {
+                mSortDescriptor = popularSort;
+                loadMovies();
+            }
             return true;
         }
 
-        if (id == R.id.action_top_rated && !mSortDescriptor.equals(SORT_TOP_RATED)) {
-            mSortDescriptor = SORT_TOP_RATED;
-            loadMovies();
+        if (id == R.id.action_top_rated) {
+            String topRatedSort = AppSettings.getTopRatedSortDescriptor(this);
+            if (!mSortDescriptor.equals(topRatedSort)) {
+                mSortDescriptor = topRatedSort;
+                loadMovies();
+            }
             return true;
         }
 
@@ -159,7 +162,6 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
 
     private void setViews() {
         mRecyclerView = mBinding.rvPosters;
-
         mErrorMessageDisplay = mBinding.tvErrorMessage;
 
         GridLayoutManager layoutManager
@@ -199,7 +201,8 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
     }
 
     private void loadMovies() {
-        if (mSortDescriptor.equals(SORT_FAVORITE)) {
+        if (mSortDescriptor.equals(AppSettings.getFavoritesSortDescriptor(this))) {
+
             AppDatabase appDb = AppDatabase.getInstance(MovieActivity.this);
             final LiveData<List<Movie>> movies = appDb.movieDao().getMovies();
             movies.observe(this, new Observer<List<Movie>>() {
@@ -209,41 +212,26 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
                     mMovieAdapter.setPosters(movies);
                 }
             });
+
+//            MovieViewModel movieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
+//            movieViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
+//                @Override
+//                public void onChanged(List<Movie> movies) {
+//                    Log.d(LOG_TAG, "Fetching favorite movies via LiveData in MovieViewModel.");
+//                    mMovieAdapter.setPosters(movies);
+//                }
+//            });
+
         } else {
             new FetchMoviesTask().execute(mSortDescriptor);
         }
     }
 
-    private void setupViewModel() {
-        MovieViewModel movieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
-
-        movieViewModel.getMovies().observe(this, favMovies -> {
-            if(favMovies.size() > 0) {
-                mMovies.clear();
-                mMovies = favMovies;
-            }
-            for (int i = 0; i < mMovies.size(); i++) {
-                Log.d(LOG_TAG, "Favorite Movie: " + mMovies.get(i).getOriginalTitle());
-            }
-            loadMovies();
-        });
-    }
-
-    /**
-     * This method will make the error message visible and hide the weather View
-     * Since it is okay to redundantly set the visibility of a View,
-     *   we don't need to check whether each view is currently visible or invisible
-     */
     private void showErrorMessage() {
         mRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * This method will make the View for movies visible and hide the error message
-     * Since it is okay to redundantly set the visibility of a View,
-     *   we don't need to check whether each view is currently visible or invisible
-     */
     private void showMovies() {
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);

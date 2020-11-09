@@ -45,14 +45,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
      * Cache of children views for a movie
      */
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-        final ImageView mFavIcon;
         final ImageView mPosterImageView;
 
         public MovieViewHolder(View view) {
             super(view);
             mPosterImageView = view.findViewById(R.id.iv_poster);
-            mFavIcon = view.findViewById(R.id.iv_fav_icon);
             view.setOnClickListener(this);
         }
 
@@ -102,16 +99,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error)
                 .into(movieViewHolder.mPosterImageView);
-
-        if (movie.getIsFavorite()) {
-            movieViewHolder.mFavIcon.setImageResource(R.drawable.ic_star_border_yellow_24px);
-        }
-
-        if (movie.getIsFavorite()) {
-            movieViewHolder.mFavIcon.setImageResource(R.drawable.ic_star_yellow_24px);
-        } else {
-            movieViewHolder.mFavIcon.setImageResource(R.drawable.ic_star_border_yellow_24px);
-        }
     }
 
     /**

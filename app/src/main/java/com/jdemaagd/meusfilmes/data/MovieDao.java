@@ -27,5 +27,4 @@ public interface MovieDao {
 
     @Query("DELETE FROM movie")
     void resetTable();
-
 }

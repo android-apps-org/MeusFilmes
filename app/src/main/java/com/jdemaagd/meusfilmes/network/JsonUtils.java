@@ -65,9 +65,6 @@ public final class JsonUtils {
         int voteCount = movieObj.getInt(VOTE_COUNT);
 
         boolean isFavorite = false;
-//        if (movie != null && movie.getIsFavorite()) {
-//            isFavorite = true;
-//        }
 
         return new Movie(movieId, backdropPath, duration, isFavorite, originalTitle,
                 popularity, posterPath, releaseDate, synopsis, userRating, voteCount);
