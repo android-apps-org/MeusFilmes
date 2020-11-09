@@ -19,7 +19,7 @@ public interface MovieDao {
     @Query("SELECT * FROM movie WHERE id = :movieId")
     Movie getMovieById(int movieId);
 
-    @Query("SELECT * FROM movie ORDER BY popularity")
+    @Query("SELECT * FROM movie")
     LiveData<List<Movie>> getMovies();
 
     @Delete
@@ -27,5 +27,4 @@ public interface MovieDao {
 
     @Query("DELETE FROM movie")
     void resetTable();
-
 }

@@ -1,19 +1,15 @@
 package com.jdemaagd.meusfilmes;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.app.LoaderManager.LoaderCallbacks;
-import androidx.loader.content.AsyncTaskLoader;
-import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -24,41 +20,33 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.facebook.stetho.DumperPluginsProvider;
-import com.facebook.stetho.Stetho;
-import com.facebook.stetho.dumpapp.DumperPlugin;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter.MovieAdapterOnClickHandler;
 import com.jdemaagd.meusfilmes.data.AppDatabase;
 import com.jdemaagd.meusfilmes.data.AppSettings;
 import com.jdemaagd.meusfilmes.databinding.ActivityMovieBinding;
+import com.jdemaagd.meusfilmes.decorator.GridItemDecorator;
 import com.jdemaagd.meusfilmes.models.Movie;
-import com.jdemaagd.meusfilmes.network.AppExecutor;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-public class MovieActivity extends AppCompatActivity implements
-        MovieAdapterOnClickHandler, LoaderCallbacks<List<Movie>> {
+public class MovieActivity extends AppCompatActivity implements MovieAdapterOnClickHandler {
 
     private static final String LOG_TAG = MovieActivity.class.getSimpleName();
 
-    private AppDatabase mAppDatabase;
     private ActivityMovieBinding mBinding;
-    private LoaderCallbacks<List<Movie>> mCallback;
-    private Context mContext;
     private TextView mErrorMessageDisplay;
     private ProgressBar mLoadingIndicator;
     private MovieAdapter mMovieAdapter;
+    private List<Movie> mMovies;
     private RecyclerView mRecyclerView;
     private String mSortDescriptor;
-
-    private static final int MOVIES_LOADER_ID = 0;
-    private static final String SORT_DESCRIPTOR = "Sort_Descriptor";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,125 +54,50 @@ public class MovieActivity extends AppCompatActivity implements
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie);
         mBinding.setLifecycleOwner(this);
 
-        mAppDatabase = AppDatabase.getInstance(getApplicationContext());
-
-        mContext = MovieActivity.this;
-
-        Stetho.initialize(
-                Stetho.newInitializerBuilder(mContext)
-                        .enableDumpapp(new DumperPluginsProvider() {
-                            @Override
-                            public Iterable<DumperPlugin> get() {
-                                return null;
-                            }
-                        })
-                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(mContext))
-                        .build());
-        // TODO: network inspection ??
-
         setViews();
 
-        mCallback = MovieActivity.this;
+        mMovies = new ArrayList<>();
+        mSortDescriptor = AppSettings.getPopularitySortDescriptor(this);
 
-        mSortDescriptor = AppSettings.getTopRatedSortDescriptor(mContext);
-
-        initLoader(mSortDescriptor);
+        loadMovies();
     }
 
-    /**
-     * Instantiate and return a new Loader for the given ID
-     * @param id The ID whose loader is to be created
-     * @param loaderArgs Any arguments supplied by the caller
-     * @return Return a new Loader instance that is ready to start loading
-     */
-    @Override
-    public Loader<List<Movie>> onCreateLoader(int id, final Bundle loaderArgs) {
+    public class FetchMoviesTask extends AsyncTask<String, Void, List<Movie>> {
 
-        return new AsyncTaskLoader<List<Movie>>(this) {
-            List<Movie> mMovies = null;
-
-            @Override
-            protected void onStartLoading() {
-                if (mMovies != null) {
-                    deliverResult(mMovies);
-                } else {
-                    mLoadingIndicator.setVisibility(View.VISIBLE);
-                    forceLoad();
-                }
-            }
-
-            @Override
-            public List<Movie> loadInBackground() {
-
-                String sortDescriptor = loaderArgs.getString(SORT_DESCRIPTOR);
-
-                try {
-                    URL moviesRequestUrl = UrlUtils.buildMoviesUrl(sortDescriptor);
-                    return JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-
-            public void deliverResult(List<Movie> movies) {
-                mMovies = movies;
-                super.deliverResult(movies);
-            }
-        };
-    }
-
-    /**
-     * Called when a previously created loader has finished its load
-     * @param loader The Loader that has finished
-     * @param movies The data generated by the Loader
-     */
-    @Override
-    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movies) {
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
-
-        Log.d(LOG_TAG, "Loading Movies from API or Database base on sort selector.");
-
-        if (mSortDescriptor == "favorites") {
-            Log.d(LOG_TAG, "Actively retrieving movies from database.");
-            final LiveData<List<Movie>> favMovies = mAppDatabase.movieDao().getMovies();
-            favMovies.observe(this, new Observer<List<Movie>>() {
-                @Override
-                public void onChanged(@Nullable List<Movie> movies) {
-                    Log.d(LOG_TAG, "Receiving database update from LiveData.");
-                    mMovieAdapter.setPosters(movies);
-                }
-            });
-        } else {
-            mMovieAdapter.setPosters(movies);
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mLoadingIndicator.setVisibility(View.VISIBLE);
         }
 
-        showMovies();
-//        if (null == movies) {
-//            showErrorMessage();
-//        } else {
-//            showMovies();
-//        }
-    }
+        @Override
+        protected List<Movie> doInBackground(String... params) {
+            String sortDescriptor = params[0];
 
-    /**
-     * Called when a previously created loader is being reset, and thus making its data unavailable
-     * The application should at this point remove any references it has to the Loader's data
-     * @param loader The Loader that is being reset
-     */
-    @Override
-    public void onLoaderReset(Loader<List<Movie>> loader) {
+            try {
+                URL moviesRequestUrl = UrlUtils.buildMoviesUrl(sortDescriptor);
+                List<Movie> movies = JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
 
-    }
+                return movies;
+            } catch (Exception e) {
+                Log.v(LOG_TAG, "ERROR: Fetching Movie Posters... ");
+                e.printStackTrace();
+                return null;
+            }
+        }
 
-    /**
-     * This method is used when we are resetting data,
-     *   so that at one point in time during a refresh of our data,
-     *   you can see that there is no data showing
-     */
-    private void invalidateData() {
-        mMovieAdapter.setPosters(null);
+        @Override
+        protected void onPostExecute(List<Movie> movies) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+
+            if (movies != null) {
+                showMovies();
+                mMovieAdapter.setPosters(movies);
+            } else {
+                Log.v(LOG_TAG, "No Movie Posters to show... ");
+                showErrorMessage();
+            }
+        }
     }
 
     /**
@@ -197,7 +110,6 @@ public class MovieActivity extends AppCompatActivity implements
         Intent movieIntent = new Intent(context, MovieDetailsActivity.class);
 
         Bundle bundle = new Bundle();
-        // bundle.putSerializable("MOVIE", movie);
         movieIntent.putExtra("MOVIE_ID", movie.getMovieId());
 
         movieIntent.putExtras(bundle);
@@ -216,26 +128,32 @@ public class MovieActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        invalidateData();
+        mMovies.clear();
 
         if (id == R.id.action_favorites) {
-            mSortDescriptor = AppSettings.getFavoritesSortDescriptor(mContext);
-            initLoader(mSortDescriptor);
-
+            String favoritesSort = AppSettings.getFavoritesSortDescriptor(this);
+            if (!mSortDescriptor.equals(favoritesSort)) {
+                mSortDescriptor = favoritesSort;
+                loadMovies();
+            }
             return true;
         }
 
         if (id == R.id.action_popular) {
-            mSortDescriptor = AppSettings.getPopularitySortDescriptor(mContext);
-            initLoader(mSortDescriptor);
-
+            String popularSort = AppSettings.getPopularitySortDescriptor(this);
+            if (!mSortDescriptor.equals(popularSort)) {
+                mSortDescriptor = popularSort;
+                loadMovies();
+            }
             return true;
         }
 
         if (id == R.id.action_top_rated) {
-            mSortDescriptor = AppSettings.getTopRatedSortDescriptor(mContext);
-            initLoader(mSortDescriptor);
-
+            String topRatedSort = AppSettings.getTopRatedSortDescriptor(this);
+            if (!mSortDescriptor.equals(topRatedSort)) {
+                mSortDescriptor = topRatedSort;
+                loadMovies();
+            }
             return true;
         }
 
@@ -244,21 +162,18 @@ public class MovieActivity extends AppCompatActivity implements
 
     private void setViews() {
         mRecyclerView = mBinding.rvPosters;
-
         mErrorMessageDisplay = mBinding.tvErrorMessage;
 
         GridLayoutManager layoutManager
                 = new GridLayoutManager(this, getColumnCount());
         mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setHasFixedSize(false);
+        mBinding.rvPosters.addItemDecoration(new GridItemDecorator(this));
 
         mMovieAdapter = new MovieAdapter(this);
         mRecyclerView.setAdapter(mMovieAdapter);
 
         // mBinding.swipeRefreshLayout.setEnabled(false);
-
         mLoadingIndicator = mBinding.pbLoadingIndicator;
-
     }
 
     private int getColumnCount() {
@@ -276,36 +191,47 @@ public class MovieActivity extends AppCompatActivity implements
             }
         } else {
             if (width > 1700) {
-                return 6;
-            } else if (width > 1200) {
                 return 5;
-            } else {
+            } else if (width > 1200) {
                 return 4;
+            } else {
+                return 3;
             }
         }
     }
 
-    private void initLoader(String sortDescriptor) {
-        Bundle bundleForLoader = new Bundle();
-        bundleForLoader.putString(SORT_DESCRIPTOR, sortDescriptor);
-        LoaderManager.getInstance(this).initLoader(MOVIES_LOADER_ID, bundleForLoader, mCallback);
+    private void loadMovies() {
+        if (mSortDescriptor.equals(AppSettings.getFavoritesSortDescriptor(this))) {
+
+            AppDatabase appDb = AppDatabase.getInstance(MovieActivity.this);
+            final LiveData<List<Movie>> movies = appDb.movieDao().getMovies();
+            movies.observe(this, new Observer<List<Movie>>() {
+                @Override
+                public void onChanged(List<Movie> movies) {
+                    Log.d(LOG_TAG, "Receiving database update from LiveData.");
+                    mMovieAdapter.setPosters(movies);
+                }
+            });
+
+//            MovieViewModel movieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
+//            movieViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
+//                @Override
+//                public void onChanged(List<Movie> movies) {
+//                    Log.d(LOG_TAG, "Fetching favorite movies via LiveData in MovieViewModel.");
+//                    mMovieAdapter.setPosters(movies);
+//                }
+//            });
+
+        } else {
+            new FetchMoviesTask().execute(mSortDescriptor);
+        }
     }
 
-    /**
-     * This method will make the error message visible and hide the weather View
-     * Since it is okay to redundantly set the visibility of a View,
-     *   we don't need to check whether each view is currently visible or invisible
-     */
     private void showErrorMessage() {
         mRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * This method will make the View for movies visible and hide the error message
-     * Since it is okay to redundantly set the visibility of a View,
-     *   we don't need to check whether each view is currently visible or invisible
-     */
     private void showMovies() {
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);

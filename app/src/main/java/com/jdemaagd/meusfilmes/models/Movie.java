@@ -18,6 +18,9 @@ public class Movie {
     @ColumnInfo(name = "duration")
     private int mDuration;
 
+    @ColumnInfo(name = "is_favorite")
+    private boolean mIsFavorite;
+
     @ColumnInfo(name = "original_title")
     private String mOriginalTitle;
 
@@ -40,19 +43,20 @@ public class Movie {
     private int mVoteCount;
 
     @Ignore
-    public Movie(int movieId, String backdropPath, double popularity, String posterPath, double userRating) {
+    public Movie(int movieId, String backdropPath, boolean isFavorite, String posterPath) {
         this.mMovieId = movieId;
         this.mBackdropPath = backdropPath;
-        this.mPopularity = popularity;
+        this.mIsFavorite = isFavorite;
         this.mPosterPath = posterPath;
-        this.mUserRating = userRating;
     }
 
-    public Movie(int movieId, String backdropPath, int duration, String originalTitle, double popularity,
-                 String posterPath, String releaseDate, String synopsis, double userRating, int voteCount) {
+    public Movie(int movieId, String backdropPath, int duration, boolean isFavorite,
+                 String originalTitle, double popularity, String posterPath,
+                 String releaseDate, String synopsis, double userRating, int voteCount) {
         this.mMovieId = movieId;
         this.mBackdropPath = backdropPath;
         this.mDuration = duration;
+        this.mIsFavorite = isFavorite;
         this.mOriginalTitle = originalTitle;
         this.mPopularity = popularity;
         this.mPosterPath = posterPath;
@@ -60,11 +64,14 @@ public class Movie {
         this.mSynopsis = synopsis;
         this.mUserRating = userRating;
         this.mVoteCount = voteCount;
+        this.mIsFavorite = false;
     }
 
     public String getBackdropPath() { return mBackdropPath; }
 
     public int getDuration() { return mDuration; }
+
+    public boolean getIsFavorite() { return mIsFavorite; }
 
     public int getMovieId() { return mMovieId; }
 
@@ -81,5 +88,7 @@ public class Movie {
     public double getUserRating() { return mUserRating; }
 
     public int getVoteCount() { return mVoteCount; }
+
+    public void setIsFavorite(boolean isFavorite) { mIsFavorite = isFavorite; }
 
 }
