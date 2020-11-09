@@ -23,6 +23,7 @@
 
 - [Volley](https://www.geeksforgeeks.org/volley-library-in-android/)
 - [Retrofit](https://square.github.io/retrofit/)
+- [Repository Module](https://developer.android.com/jetpack/guide#fetch-data)
 
 ## Resources
 

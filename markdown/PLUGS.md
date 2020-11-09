@@ -11,3 +11,8 @@
 - An image file format from Google
 - To reduce size of images w/o having to sacrifice quality for storage space
 
+## [Retrofit](https://guides.codepath.com/android/consuming-apis-with-retrofit)
+
+- A type-safe REST client for Android, Java and Kotlin by Square
+- Dependency: [OkHttp](https://square.github.io/okhttp/)
+

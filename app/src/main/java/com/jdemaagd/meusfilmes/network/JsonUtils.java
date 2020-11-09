@@ -34,7 +34,7 @@ public final class JsonUtils {
             String posterPath = jsonMovie.getString(POSTER_PATH);
             String backdropPath = jsonMovie.getString(BACKDROP_PATH);
 
-            Movie movie = new Movie(movieId, backdropPath, false, posterPath);
+            Movie movie = new Movie(movieId, backdropPath, posterPath);
 
             parsedMovies.add(movie);
         }
@@ -64,19 +64,7 @@ public final class JsonUtils {
         double userRating = movieObj.getDouble(USER_RATING);
         int voteCount = movieObj.getInt(VOTE_COUNT);
 
-        boolean isFavorite = false;
-
-        return new Movie(movieId, backdropPath, duration, isFavorite, originalTitle,
+        return new Movie(movieId, backdropPath, duration, originalTitle,
                 popularity, posterPath, releaseDate, synopsis, userRating, voteCount);
-    }
-
-    private static Movie getFavoriteMovie(List<Movie> favMovies, int movieId) {
-
-        for (Movie movie : favMovies) {
-            if (movie.getMovieId() == movieId)
-                return movie;
-        }
-
-        return null;
     }
 }
