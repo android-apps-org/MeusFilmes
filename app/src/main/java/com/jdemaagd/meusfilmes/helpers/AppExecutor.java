@@ -1,4 +1,4 @@
-package com.jdemaagd.meusfilmes.network;
+package com.jdemaagd.meusfilmes.helpers;
 
 import android.os.Handler;
 import android.os.Looper;

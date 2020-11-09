@@ -17,15 +17,13 @@ public final class UrlUtils {
 
     private static final String LOG_TAG = UrlUtils.class.getSimpleName();
 
-    private static final String MOVIES_BASE_URL = "https://api.themoviedb.org/3";
-
     final static String API_KEY = BuildConfig.TMDB_API_KEY;
     final static String API_PARAM = "api_key";
     final static String MOVIE_PATH_SEGMENT = "movie";
 
     public static URL buildMovieUrl(int movieId) {
 
-        Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
+        Uri builtUri = Uri.parse(BuildConfig.MOVIES_BASE_URL).buildUpon()
                 .appendPath(MOVIE_PATH_SEGMENT)
                 .appendPath(Integer.toString(movieId))
                 .appendQueryParameter(API_PARAM, API_KEY)
@@ -45,7 +43,7 @@ public final class UrlUtils {
 
     public static URL buildMoviesUrl(String descriptor) {
 
-        Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
+        Uri builtUri = Uri.parse(BuildConfig.MOVIES_BASE_URL).buildUpon()
                 .appendPath(MOVIE_PATH_SEGMENT)
                 .appendPath(descriptor)
                 .appendQueryParameter(API_PARAM, API_KEY)
@@ -87,25 +85,4 @@ public final class UrlUtils {
             urlConnection.disconnect();
         }
     }
-
-        /*
-            Reviews:
-            Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
-                .appendPath(MOVIE_PATH_SEGMENT)
-                .appendPath(movieId)
-                .appendPath(REVIEWS_PATH_SEGMENT)
-                .appendQueryParameter(API_PARAM, API_KEY)
-                .build();
-         */
-
-        /*
-            Trailers:
-            Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
-                .appendPath(MOVIE_PATH_SEGMENT)
-                .appendPath(movieId)
-                .appendPath(VIDEOS_PATH_SEGMENT)
-                .appendQueryParameter(API_PARAM, API_KEY)
-                .build();
-         */
-
 }

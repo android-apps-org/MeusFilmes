@@ -2,8 +2,7 @@ package com.jdemaagd.meusfilmes;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,13 +21,13 @@ import android.widget.TextView;
 
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter.MovieAdapterOnClickHandler;
-import com.jdemaagd.meusfilmes.data.AppDatabase;
 import com.jdemaagd.meusfilmes.data.AppSettings;
 import com.jdemaagd.meusfilmes.databinding.ActivityMovieBinding;
 import com.jdemaagd.meusfilmes.decorator.GridItemDecorator;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
+import com.jdemaagd.meusfilmes.viewmodels.MovieViewModel;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -39,12 +38,14 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 public class MovieActivity extends AppCompatActivity implements MovieAdapterOnClickHandler {
 
     private static final String LOG_TAG = MovieActivity.class.getSimpleName();
+    private static final String EXTRA_MOVIE_ID = "MOVIE_ID";
 
     private ActivityMovieBinding mBinding;
     private TextView mErrorMessageDisplay;
     private ProgressBar mLoadingIndicator;
     private MovieAdapter mMovieAdapter;
     private List<Movie> mMovies;
+    private MovieViewModel mMovieViewModel;
     private RecyclerView mRecyclerView;
     private String mSortDescriptor;
 
@@ -58,6 +59,8 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
 
         mMovies = new ArrayList<>();
         mSortDescriptor = AppSettings.getPopularitySortDescriptor(this);
+
+        mMovieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
 
         loadMovies();
     }
@@ -108,11 +111,7 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
     public void onClick(Movie movie) {
         Context context = this;
         Intent movieIntent = new Intent(context, MovieDetailsActivity.class);
-
-        Bundle bundle = new Bundle();
-        movieIntent.putExtra("MOVIE_ID", movie.getMovieId());
-
-        movieIntent.putExtras(bundle);
+        movieIntent.putExtra(EXTRA_MOVIE_ID, movie.getMovieId());
         startActivity(movieIntent);
     }
 
@@ -183,6 +182,7 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
         // this.getDisplay().getRealMetrics(displayMetrics);
         int width = displayMetrics.widthPixels;
 
+        // TODO: abstract this away?
         if (getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
             if (width > 1000) {
                 return 3;
@@ -202,26 +202,10 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
 
     private void loadMovies() {
         if (mSortDescriptor.equals(AppSettings.getFavoritesSortDescriptor(this))) {
-
-            AppDatabase appDb = AppDatabase.getInstance(MovieActivity.this);
-            final LiveData<List<Movie>> movies = appDb.movieDao().getMovies();
-            movies.observe(this, new Observer<List<Movie>>() {
-                @Override
-                public void onChanged(List<Movie> movies) {
-                    Log.d(LOG_TAG, "Receiving database update from LiveData.");
-                    mMovieAdapter.setPosters(movies);
-                }
+            mMovieViewModel.getMovies().observe(this, movies -> {
+                Log.d(LOG_TAG, "Fetching favorite movies via LiveData in MovieViewModel.");
+                mMovieAdapter.setPosters(movies);
             });
-
-//            MovieViewModel movieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
-//            movieViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
-//                @Override
-//                public void onChanged(List<Movie> movies) {
-//                    Log.d(LOG_TAG, "Fetching favorite movies via LiveData in MovieViewModel.");
-//                    mMovieAdapter.setPosters(movies);
-//                }
-//            });
-
         } else {
             new FetchMoviesTask().execute(mSortDescriptor);
         }

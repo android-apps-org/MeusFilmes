@@ -4,11 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.AsyncTaskLoader;
@@ -17,9 +18,11 @@ import androidx.loader.content.Loader;
 import com.jdemaagd.meusfilmes.data.AppDatabase;
 import com.jdemaagd.meusfilmes.databinding.ActivityDetailsMovieBinding;
 import com.jdemaagd.meusfilmes.models.Movie;
-import com.jdemaagd.meusfilmes.network.AppExecutor;
+import com.jdemaagd.meusfilmes.helpers.AppExecutor;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
+import com.jdemaagd.meusfilmes.viewmodels.MovieDetailsViewModel;
+import com.jdemaagd.meusfilmes.viewmodels.ViewModelFactory;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
@@ -28,17 +31,16 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
 
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
 
+    private static final String EXTRA_MOVIE_ID = "MOVIE_ID";
+
     private AppDatabase mAppDatabase;
     private ActivityDetailsMovieBinding mBinding;
     private LoaderCallbacks<Movie> mCallback;
-    private boolean mFavorite;
+    private boolean mIsFav;
     private Movie mMovie;
     private int mMovieId;
 
     private static final int MOVIE_LOADER_ID = 1;
-
-    // "w92", "w154", "w185", "w342", "w500", "w780",
-    private static final String POSTER_BASE_URL = "https://image.tmdb.org/t/p/w342";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,11 +51,9 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
         Intent intent = getIntent();
 
         if (intent != null) {
-            Bundle movieBundle = intent.getExtras();
-            // mMovie = (Movie) movieBundle.getSerializable("MOVIE");
-            mMovieId = intent.getIntExtra("MOVIE_ID", 0);
+            mMovieId = intent.getIntExtra(EXTRA_MOVIE_ID, 0);
 
-            mFavorite = false;
+            mIsFav = false;
             // TODO: reviews and trailers to view
             // ../id/reviews
             // ../id/videos
@@ -134,7 +134,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
     private void bindFavIcon() {
         mBinding.ivFavorite.setOnClickListener((view) -> {
             AppExecutor.getInstance().diskIO().execute(() -> {
-                if (mFavorite) {
+                if (mIsFav) {
                     Log.d(LOG_TAG, "Remove movie from database via Room.");
                     mAppDatabase.movieDao().removeMovie(mMovie);
                 } else {
@@ -151,15 +151,20 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
     }
 
     private void setFavIcon() {
-        AppExecutor.getInstance().diskIO().execute(() -> {
-            final Movie movie = mAppDatabase.movieDao().getMovieById(mMovie.getMovieId());
-
-            if (movie == null) {
-                mFavorite = false;
-                mBinding.ivFavorite.setImageResource(R.drawable.ic_heart_border_pink_24dp);
-            } else {
-                mFavorite = true;
-                mBinding.ivFavorite.setImageResource(R.drawable.ic_heart_pink_24dp);
+        ViewModelFactory factory = new ViewModelFactory(mAppDatabase, mMovieId);
+        final MovieDetailsViewModel movieDetailsViewModel = new ViewModelProvider(this, factory).get(MovieDetailsViewModel.class);
+        movieDetailsViewModel.getMovie().observe(this, new Observer<Movie>() {
+            @Override
+            public void onChanged(Movie favMovie) {
+                // movieDetailsViewModel.getMovie().removeObserver(this);
+                Log.d(LOG_TAG, "Receiving LiveData Update.");
+                if (favMovie == null) {
+                    mIsFav = false;
+                    mBinding.ivFavorite.setImageResource(R.drawable.ic_heart_border_pink_24dp);
+                } else {
+                    mIsFav = true;
+                    mBinding.ivFavorite.setImageResource(R.drawable.ic_heart_pink_24dp);
+                }
             }
         });
     }
@@ -172,7 +177,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
         mBinding.tvOverview.setText(mMovie.getSynopsis());
 
         Picasso.get()
-                .load(POSTER_BASE_URL + mMovie.getPosterPath())
+                .load(BuildConfig.POSTER_BASE_URL + mMovie.getPosterPath())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error)
                 .into(mBinding.ivPosterThumb);

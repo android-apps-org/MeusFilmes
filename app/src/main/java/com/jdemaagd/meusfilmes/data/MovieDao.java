@@ -17,7 +17,7 @@ public interface MovieDao {
     void addMovie(Movie movie);
 
     @Query("SELECT * FROM movie WHERE id = :movieId")
-    Movie getMovieById(int movieId);
+    LiveData<Movie> getMovieById(int movieId);
 
     @Query("SELECT * FROM movie")
     LiveData<List<Movie>> getMovies();
