@@ -15,6 +15,7 @@ public class MovieViewModel extends AndroidViewModel {
 
     private static final String LOG_TAG = MovieViewModel.class.getSimpleName();
 
+    // cache movies
     private LiveData<List<Movie>> mMovies;
 
     public MovieViewModel(@NonNull Application application) {

@@ -31,5 +31,4 @@ public class AppSettings {
     public static String getTopRatedSortDescriptor() {
         return TOP_RATED_SORT_DESCRIPTOR;
     }
-
 }
