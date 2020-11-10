@@ -1,6 +1,7 @@
 package com.jdemaagd.meusfilmes.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,10 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
+
+    private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
+
+    private static final String POSTER_URL = BuildConfig.POSTER_BASE_URL;
 
     private List<Movie> mMovies;
 
@@ -92,8 +97,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     @Override
     public void onBindViewHolder(MovieViewHolder movieViewHolder, int position) {
         Movie movie = mMovies.get(position);
+
+        Log.d(LOG_TAG, "Load Movie Poster via Picasso.");
         Picasso.get()
-                .load(BuildConfig.POSTER_BASE_URL + movie.getPosterPath())
+                .load(POSTER_URL + movie.getPosterPath())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error)
                 .into(movieViewHolder.mPosterImageView);

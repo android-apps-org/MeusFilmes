@@ -15,4 +15,6 @@
     <string name="action_popular">Popular</string>
     <string name="action_top_rated">Top Rated</string>
 
+    <string name="language">en-US</string>
+
 </resources>

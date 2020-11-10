@@ -24,9 +24,38 @@
 - [Volley](https://www.geeksforgeeks.org/volley-library-in-android/)
 - [Retrofit](https://square.github.io/retrofit/)
 - [Repository Module](https://developer.android.com/jetpack/guide#fetch-data)
+- MovieActivity -> MovieViewModel -> MovieRepository -> TMDBService -> API Endpoints
+```
+    apiClient.getMovies(
+            getApplication().getString(R.string.language),
+            String.valueOf(page)).enqueue(new Callback<ApiResponse<Movie>>() {
+        @Override
+        public void onResponse(Call<ApiResponse<Movie>> call,
+                               Response<ApiResponse<Movie>> response) {
+            if (response.isSuccessful()) {
+                List<Movie> result = response.body().results;
+                List<Movie> value = mMovies.getValue();
+                if (value == null || value.isEmpty()) {
+                    mMovies.setValue(result);
+                } else {
+                    value.addAll(result);
+                    mMovies.setValue(value);
+                }
+                status.setValue(0);
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ApiResponse<Movie>> call, Throwable t) {
+            mMovies = null;
+            status.setValue(NO_INTERNET);
+        }
+    });
+```
 
 ## Resources
 
 - [MovieDB Status Codes](https://www.themoviedb.org/documentation/api/status-codes)
 - [URLConnection](https://developer.android.com/reference/java/net/URLConnection)
+- [Retrofit 2](https://www.youtube.com/watch?v=KIAoQbAu3eA&feature=youtu.be&t=35m8s)
 

@@ -23,7 +23,7 @@ import com.jdemaagd.meusfilmes.adapters.MovieAdapter;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter.MovieAdapterOnClickHandler;
 import com.jdemaagd.meusfilmes.data.AppSettings;
 import com.jdemaagd.meusfilmes.databinding.ActivityMovieBinding;
-import com.jdemaagd.meusfilmes.decorator.GridItemDecorator;
+import com.jdemaagd.meusfilmes.decorators.GridItemDecorator;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.jdemaagd.meusfilmes.network.JsonUtils;
 import com.jdemaagd.meusfilmes.network.UrlUtils;
@@ -202,12 +202,14 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
 
     private void loadMovies() {
         if (mSortDescriptor.equals(AppSettings.getFavoritesSortDescriptor(this))) {
-            mMovieViewModel.getMovies().observe(this, movies -> {
+            mMovieViewModel.getAllMovies().observe(this, movies -> {
                 Log.d(LOG_TAG, "Fetching favorite movies via LiveData in MovieViewModel.");
                 mMovieAdapter.setPosters(movies);
             });
         } else {
             new FetchMoviesTask().execute(mSortDescriptor);
+
+            // TODO: leverage retrofit, remove AsyncTask
         }
     }
 
