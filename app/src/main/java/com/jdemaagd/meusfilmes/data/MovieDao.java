@@ -20,7 +20,7 @@ public interface MovieDao {
     LiveData<Movie> getMovieById(int movieId);
 
     @Query("SELECT * FROM movie")
-    LiveData<List<Movie>> getMovies();
+    LiveData<List<Movie>> getAllMovies();
 
     @Delete
     void removeMovie(Movie movie);

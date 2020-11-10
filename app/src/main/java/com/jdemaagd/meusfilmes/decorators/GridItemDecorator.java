@@ -1,4 +1,4 @@
-package com.jdemaagd.meusfilmes.decorator;
+package com.jdemaagd.meusfilmes.decorators;
 
 import android.content.Context;
 import android.graphics.Rect;

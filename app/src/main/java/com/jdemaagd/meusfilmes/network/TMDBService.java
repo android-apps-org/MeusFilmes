@@ -12,10 +12,12 @@ import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class TmdbService {
+public class TMDBService {
 
-    private final static String API_KEY = BuildConfig.TMDB_API_KEY;
-    private static final String BASE_URL = "https://api.themoviedb.org/3/";
+    private static final String LOG_TAG = TMDBService.class.getSimpleName();
+
+    private static final String API_KEY = BuildConfig.TMDB_API_KEY;
+    private static final String BASE_URL = BuildConfig.MOVIES_BASE_URL;
 
     private static OkHttpClient okHttpClient = new OkHttpClient.Builder()
             .addInterceptor(new Interceptor() {

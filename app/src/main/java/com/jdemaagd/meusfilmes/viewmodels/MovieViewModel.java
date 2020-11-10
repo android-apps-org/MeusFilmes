@@ -21,10 +21,10 @@ public class MovieViewModel extends AndroidViewModel {
     public MovieViewModel(@NonNull Application application) {
         super(application);
         AppDatabase database = AppDatabase.getInstance(this.getApplication());
-        mMovies = database.movieDao().getMovies();
+        mMovies = database.movieDao().getAllMovies();
     }
 
-    public LiveData<List<Movie>> getMovies() {
+    public LiveData<List<Movie>> getAllMovies() {
         return mMovies;
     }
 }
