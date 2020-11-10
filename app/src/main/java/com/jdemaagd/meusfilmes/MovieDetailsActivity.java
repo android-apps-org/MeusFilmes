@@ -32,6 +32,8 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
 
     private static final String EXTRA_MOVIE_ID = "MOVIE_ID";
+    private static final String POSTER_URL = BuildConfig.POSTER_BASE_URL;
+    private static final int MOVIE_LOADER_ID = 1;
 
     private AppDatabase mAppDatabase;
     private ActivityDetailsMovieBinding mBinding;
@@ -39,8 +41,6 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
     private boolean mIsFav;
     private Movie mMovie;
     private int mMovieId;
-
-    private static final int MOVIE_LOADER_ID = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,7 +177,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderCal
         mBinding.tvOverview.setText(mMovie.getSynopsis());
 
         Picasso.get()
-                .load(BuildConfig.POSTER_BASE_URL + mMovie.getPosterPath())
+                .load(POSTER_URL + mMovie.getPosterPath())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error)
                 .into(mBinding.ivPosterThumb);
