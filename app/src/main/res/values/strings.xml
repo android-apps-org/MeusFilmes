@@ -1,11 +1,5 @@
 <resources>
     <string name="app_name">Meus Filmes</string>
-    
-    <string-array name="overview">
-        <item>Enola Holmes</item>
-        <item>La innòcencia</item>
-        <item>Mulan</item>
-    </string-array>
 
     <string name="error_message">
         An error has occurred. Please try again by clicking REFRESH.

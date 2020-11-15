@@ -42,6 +42,49 @@
 - Exists even if there is no UI
 
 
+## AsyncTask
+```
+    public class FetchMoviesTask extends AsyncTask<String, Void, List<Movie>> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mLoadingIndicator.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected List<Movie> doInBackground(String... params) {
+            String sortDescriptor = params[0];
+
+            try {
+                // LiveData<List<Movie>> movies = mMovieViewModel.getPopularMovies();
+
+                URL moviesRequestUrl = UrlUtils.buildMoviesUrl(sortDescriptor);
+                List<Movie> movies = JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
+
+                return movies;
+            } catch (Exception e) {
+                Log.v(LOG_TAG, "ERROR: Fetching Movie Posters... ");
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(List<Movie> movies) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+
+            if (movies != null) {
+                showMovies();
+                mMovieAdapter.setPosters(movies);
+            } else {
+                Log.v(LOG_TAG, "No Movie Posters to show... ");
+                showErrorMessage();
+            }
+        }
+    }
+```
+
 ## Resources
 
 - [Bound Service](https://developer.android.com/guide/components/bound-services.html)

@@ -9,8 +9,8 @@ import android.widget.ImageView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.jdemaagd.meusfilmes.BuildConfig;
 import com.jdemaagd.meusfilmes.R;
+import com.jdemaagd.meusfilmes.common.AppConstants;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.squareup.picasso.Picasso;
 
@@ -19,8 +19,6 @@ import java.util.List;
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
     private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
-
-    private static final String POSTER_URL = BuildConfig.POSTER_BASE_URL;
 
     private List<Movie> mMovies;
 
@@ -100,7 +98,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         Log.d(LOG_TAG, "Load Movie Poster via Picasso.");
         Picasso.get()
-                .load(POSTER_URL + movie.getPosterPath())
+                .load(AppConstants.POSTER_URL + movie.getPosterPath())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error)
                 .into(movieViewHolder.mPosterImageView);
