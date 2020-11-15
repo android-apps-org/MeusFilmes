@@ -1,6 +1,6 @@
 package com.jdemaagd.meusfilmes.network;
 
-import com.jdemaagd.meusfilmes.BuildConfig;
+import com.jdemaagd.meusfilmes.common.AppConstants;
 
 import java.io.IOException;
 
@@ -16,9 +16,6 @@ public class TMDBService {
 
     private static final String LOG_TAG = TMDBService.class.getSimpleName();
 
-    private static final String API_KEY = BuildConfig.TMDB_API_KEY;
-    private static final String BASE_URL = BuildConfig.MOVIES_BASE_URL;
-
     private static OkHttpClient okHttpClient = new OkHttpClient.Builder()
             .addInterceptor(new Interceptor() {
                 @Override
@@ -27,7 +24,7 @@ public class TMDBService {
                     HttpUrl httpUrl = request.url();
 
                     httpUrl = httpUrl.newBuilder()
-                            .addQueryParameter("api_key", API_KEY)
+                            .addQueryParameter("api_key", AppConstants.API_KEY)
                             .build();
 
                     request = request.newBuilder().url(httpUrl).build();
@@ -37,7 +34,7 @@ public class TMDBService {
 
     private static Retrofit.Builder builder =
             new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
+                    .baseUrl(AppConstants.BASE_URL)
                     .client(okHttpClient)
                     .addConverterFactory(GsonConverterFactory.create());
 
