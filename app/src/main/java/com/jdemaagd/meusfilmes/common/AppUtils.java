@@ -2,8 +2,6 @@ package com.jdemaagd.meusfilmes.common;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.ConnectivityManager.NetworkCallback;
-import android.net.Network;
 import android.net.NetworkInfo;
 import android.util.Log;
 

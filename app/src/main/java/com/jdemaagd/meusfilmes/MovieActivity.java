@@ -1,12 +1,10 @@
 package com.jdemaagd.meusfilmes;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +26,6 @@ import com.jdemaagd.meusfilmes.common.ConnectivityCallback;
 import com.jdemaagd.meusfilmes.databinding.ActivityMovieBinding;
 import com.jdemaagd.meusfilmes.decorators.GridItemDecorator;
 import com.jdemaagd.meusfilmes.models.Movie;
-import com.jdemaagd.meusfilmes.ui.RecyclerViewPagination;
 import com.jdemaagd.meusfilmes.viewmodels.MovieViewModel;
 
 import java.util.ArrayList;
@@ -49,8 +46,6 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
     private List<Movie> mMovies;
     private MovieViewModel mMovieViewModel;
     private RecyclerView mRecyclerView;
-    private Bundle mSavedInstanceState;
-    private RecyclerViewPagination mScrollListener;
     private String mSortDescriptor;
 
     @Override

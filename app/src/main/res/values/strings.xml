@@ -10,4 +10,15 @@
 
     <string name="language">en-US</string>
 
+    <string name="add_favorite">Added to favorites</string>
+    <string name="remove_favorite">Removed from favorites</string>
+
+    <string name="database_name">movie</string>
+
+    <string name="extra_movie_id">MOVIE_ID</string>
+
+    <string name="sort_favorites">favorites</string>
+    <string name="sort_popular">popular</string>
+    <string name="sort_top_rated">top_rated</string>
+
 </resources>

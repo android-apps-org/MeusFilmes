@@ -8,6 +8,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
+import com.jdemaagd.meusfilmes.R;
 import com.jdemaagd.meusfilmes.data.DateConverter;
 import com.jdemaagd.meusfilmes.data.MovieDao;
 import com.jdemaagd.meusfilmes.models.Movie;
@@ -27,7 +28,7 @@ public abstract class AppDatabase extends RoomDatabase {
             synchronized (LOCK) {
                 Log.d(LOG_TAG, "Creating new database instance.");
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
-                        AppDatabase.class, AppConstants.DATABASE_NAME)
+                        AppDatabase.class, context.getString(R.string.database_name))
                         .build();
             }
         }

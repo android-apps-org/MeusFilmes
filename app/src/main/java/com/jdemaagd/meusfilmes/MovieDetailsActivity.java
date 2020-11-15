@@ -50,7 +50,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         if (intent != null) {
             mApiClient = TMDBService.createService(TMDBClient.class);
             mAppDatabase = AppDatabase.getInstance(getApplicationContext());
-            mMovieId = intent.getIntExtra(AppConstants.EXTRA_MOVIE_ID, 0);
+            mMovieId = intent.getIntExtra(getString(R.string.extra_movie_id), 0);
 
             mIsFav = false;
             // TODO: reviews and trailers to view

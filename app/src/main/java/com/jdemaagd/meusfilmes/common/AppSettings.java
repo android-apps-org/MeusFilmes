@@ -2,33 +2,19 @@ package com.jdemaagd.meusfilmes.common;
 
 import android.content.Context;
 
-import com.jdemaagd.meusfilmes.common.AppConstants;
-
-// TODO: Shared Preferences
+import com.jdemaagd.meusfilmes.R;
 
 public class AppSettings {
 
     public static String getFavoritesSortDescriptor(Context context) {
-        return getFavoritesSortDescriptor();
+        return context.getString(R.string.sort_favorites);
     }
 
     public static String getPopularitySortDescriptor(Context context) {
-        return getPopularitySortDescriptor();
+        return context.getString(R.string.sort_popular);
     }
 
     public static String getTopRatedSortDescriptor(Context context) {
-        return getTopRatedSortDescriptor();
-    }
-
-    private static String getFavoritesSortDescriptor() {
-        return AppConstants.FAVORITES_SORT_DESCRIPTOR;
-    }
-
-    private static String getPopularitySortDescriptor() {
-        return AppConstants.POPULARITY_SORT_DESCRIPTOR;
-    }
-
-    public static String getTopRatedSortDescriptor() {
-        return AppConstants.TOP_RATED_SORT_DESCRIPTOR;
+        return context.getString(R.string.sort_top_rated);
     }
 }
