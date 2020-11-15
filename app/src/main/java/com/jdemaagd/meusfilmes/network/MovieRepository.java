@@ -1,6 +1,7 @@
 package com.jdemaagd.meusfilmes.network;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -70,6 +71,7 @@ public class MovieRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<Movie>> call, Throwable t) {
+                Log.d(LOG_TAG, "MovieRepository.loadMovies: network error.");
                 mMovies = null;
             }
         });

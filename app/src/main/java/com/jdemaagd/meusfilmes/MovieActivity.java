@@ -1,10 +1,12 @@
 package com.jdemaagd.meusfilmes;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,13 +18,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter.MovieAdapterOnClickHandler;
-import com.jdemaagd.meusfilmes.data.AppSettings;
+import com.jdemaagd.meusfilmes.common.AppConstants;
+import com.jdemaagd.meusfilmes.common.AppSettings;
+import com.jdemaagd.meusfilmes.common.ConnectivityCallback;
 import com.jdemaagd.meusfilmes.databinding.ActivityMovieBinding;
 import com.jdemaagd.meusfilmes.decorators.GridItemDecorator;
 import com.jdemaagd.meusfilmes.models.Movie;
+import com.jdemaagd.meusfilmes.ui.RecyclerViewPagination;
 import com.jdemaagd.meusfilmes.viewmodels.MovieViewModel;
 
 import java.util.ArrayList;
@@ -37,11 +43,14 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
 
     private ActivityMovieBinding mBinding;
     private TextView mErrorMessageDisplay;
+    private GridLayoutManager mGridLayoutManager;
     private ProgressBar mLoadingIndicator;
     private MovieAdapter mMovieAdapter;
     private List<Movie> mMovies;
     private MovieViewModel mMovieViewModel;
     private RecyclerView mRecyclerView;
+    private Bundle mSavedInstanceState;
+    private RecyclerViewPagination mScrollListener;
     private String mSortDescriptor;
 
     @Override
@@ -50,12 +59,15 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie);
         mBinding.setLifecycleOwner(this);
 
-        setViews();
+        ConnectivityCallback connectivityCallback = new ConnectivityCallback(getApplicationContext());
+        connectivityCallback.registerNetworkCallback();
+        Log.d(LOG_TAG, "Connected: " + AppConstants.IS_NETWORK_CONNECTED);
 
         mMovies = new ArrayList<>();
         mSortDescriptor = AppSettings.getPopularitySortDescriptor(this);
-
         mMovieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
+
+        setViews();
 
         loadMovies();
     }
@@ -120,15 +132,16 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
         mRecyclerView = mBinding.rvPosters;
         mErrorMessageDisplay = mBinding.tvErrorMessage;
 
-        GridLayoutManager layoutManager
-                = new GridLayoutManager(this, getColumnCount());
-        mRecyclerView.setLayoutManager(layoutManager);
+        mGridLayoutManager = new GridLayoutManager(this, getColumnCount());
+        mRecyclerView.setLayoutManager(mGridLayoutManager);
         mBinding.rvPosters.addItemDecoration(new GridItemDecorator(this));
 
         mMovieAdapter = new MovieAdapter(this);
         mRecyclerView.setAdapter(mMovieAdapter);
 
-        // mBinding.swipeRefreshLayout.setEnabled(false);
+        mBinding.swipeRefreshLayout.setEnabled(false);
+        mBinding.swipeRefreshLayout.setOnRefreshListener(() -> loadMovies());
+
         mLoadingIndicator = mBinding.pbLoadingIndicator;
     }
 
@@ -141,26 +154,36 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
     }
 
     private void loadMovies() {
-        if (mSortDescriptor.equals(AppSettings.getFavoritesSortDescriptor(this))) {
-            mMovieViewModel.getFavMovies().observe(this, movies -> {
-                Log.d(LOG_TAG, "Fetching favorite movies via LiveData in MovieViewModel.");
-                if (movies == null) {
-                    showErrorMessage();
-                } else {
-                    showMovies();
-                }
-                mMovieAdapter.setPosters(movies);
-            });
-        } else {
-            mMovieViewModel.getSortedMovies(mSortDescriptor).observe(this, movies -> {
-                Log.d(LOG_TAG, "Fetching TMDB API movies via RetroFit.");
-                if (movies == null) {
-                    showErrorMessage();
-                } else {
-                    showMovies();
-                }
-                mMovieAdapter.setPosters(movies);
-            });
+        if(AppConstants.IS_NETWORK_CONNECTED)
+        {
+            if (mSortDescriptor.equals(AppSettings.getFavoritesSortDescriptor(this))) {
+                mMovieViewModel.getFavMovies().observe(this, movies -> {
+                    Log.d(LOG_TAG, "Fetching favorite movies via LiveData in MovieViewModel.");
+                    if (movies == null) {
+                        showErrorMessage();
+                    } else {
+                        showMovies();
+                    }
+                    mMovieAdapter.setPosters(movies);
+                });
+            } else {
+                mMovieViewModel.getSortedMovies(mSortDescriptor).observe(this, movies -> {
+                    Log.d(LOG_TAG, "Fetching TMDB API movies via RetroFit.");
+                    if (movies == null) {
+                        showErrorMessage();
+                    } else {
+                        showMovies();
+                    }
+                    mMovieAdapter.setPosters(movies);
+                });
+            }
+        }
+        else
+        {
+            Log.d(LOG_TAG, "MovieActivity.loadMovies: network error.");
+            Toast.makeText(MovieActivity.this,
+                    getString(R.string.network_error), Toast.LENGTH_LONG).show();
+            showErrorMessage();
         }
     }
 

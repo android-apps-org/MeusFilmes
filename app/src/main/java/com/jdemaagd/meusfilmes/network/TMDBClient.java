@@ -20,12 +20,12 @@ public interface TMDBClient {
                                                     @Query("page") String page);
 
     @GET("movie/{id}/reviews")
-    Call<ApiResponse<Review>> getReviews(@Path("id") String id);
+    Call<ApiResponse<Review>> getReviews(@Path("id") int id);
 
     @GET("movie/top_rated")
     Call<ApiResponse<Movie>> getTopRatedMovies(@Query("language") String language,
                                                      @Query("page") String page);
 
     @GET("movie/{id}/videos")
-    Call<ApiResponse<Video>> getVideos(@Path("id") String id);
+    Call<ApiResponse<Video>> getVideos(@Path("id") int id);
 }

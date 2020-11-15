@@ -1,4 +1,4 @@
-package com.jdemaagd.meusfilmes.data;
+package com.jdemaagd.meusfilmes.common;
 
 import android.content.Context;
 

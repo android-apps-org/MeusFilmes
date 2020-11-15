@@ -3,7 +3,7 @@ package com.jdemaagd.meusfilmes.viewmodels;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.jdemaagd.meusfilmes.data.AppDatabase;
+import com.jdemaagd.meusfilmes.common.AppDatabase;
 
 public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 

@@ -1,4 +1,4 @@
-package com.jdemaagd.meusfilmes.data;
+package com.jdemaagd.meusfilmes.common;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,7 +8,8 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
-import com.jdemaagd.meusfilmes.common.AppConstants;
+import com.jdemaagd.meusfilmes.data.DateConverter;
+import com.jdemaagd.meusfilmes.data.MovieDao;
 import com.jdemaagd.meusfilmes.models.Movie;
 
 @Database(entities = {Movie.class}, version = 1, exportSchema = false)
