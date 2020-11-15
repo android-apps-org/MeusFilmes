@@ -8,9 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,11 +23,8 @@ import com.jdemaagd.meusfilmes.data.AppSettings;
 import com.jdemaagd.meusfilmes.databinding.ActivityMovieBinding;
 import com.jdemaagd.meusfilmes.decorators.GridItemDecorator;
 import com.jdemaagd.meusfilmes.models.Movie;
-import com.jdemaagd.meusfilmes.network.JsonUtils;
-import com.jdemaagd.meusfilmes.network.UrlUtils;
 import com.jdemaagd.meusfilmes.viewmodels.MovieViewModel;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,44 +58,6 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
         mMovieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
 
         loadMovies();
-    }
-
-    public class FetchMoviesTask extends AsyncTask<String, Void, List<Movie>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected List<Movie> doInBackground(String... params) {
-            String sortDescriptor = params[0];
-
-            try {
-                URL moviesRequestUrl = UrlUtils.buildMoviesUrl(sortDescriptor);
-                List<Movie> movies = JsonUtils.getMoviesFromJson(UrlUtils.getResponseFromRequestUrl(moviesRequestUrl));
-
-                return movies;
-            } catch (Exception e) {
-                Log.v(LOG_TAG, "ERROR: Fetching Movie Posters... ");
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> movies) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-
-            if (movies != null) {
-                showMovies();
-                mMovieAdapter.setPosters(movies);
-            } else {
-                Log.v(LOG_TAG, "No Movie Posters to show... ");
-                showErrorMessage();
-            }
-        }
     }
 
     /**
@@ -176,40 +133,34 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
     }
 
     private int getColumnCount() {
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        // this.getDisplay().getRealMetrics(displayMetrics);
-        int width = displayMetrics.widthPixels;
-
-        // TODO: abstract this away?
         if (getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
-            if (width > 1000) {
-                return 3;
-            } else {
-                return 2;
-            }
+            return 3;
         } else {
-            if (width > 1700) {
-                return 5;
-            } else if (width > 1200) {
-                return 4;
-            } else {
-                return 3;
-            }
+            return 5;
         }
     }
 
     private void loadMovies() {
         if (mSortDescriptor.equals(AppSettings.getFavoritesSortDescriptor(this))) {
-            mMovieViewModel.getAllMovies().observe(this, movies -> {
+            mMovieViewModel.getFavMovies().observe(this, movies -> {
                 Log.d(LOG_TAG, "Fetching favorite movies via LiveData in MovieViewModel.");
+                if (movies == null) {
+                    showErrorMessage();
+                } else {
+                    showMovies();
+                }
                 mMovieAdapter.setPosters(movies);
             });
         } else {
-            new FetchMoviesTask().execute(mSortDescriptor);
-
-            // TODO: leverage retrofit, remove AsyncTask
+            mMovieViewModel.getSortedMovies(mSortDescriptor).observe(this, movies -> {
+                Log.d(LOG_TAG, "Fetching TMDB API movies via RetroFit.");
+                if (movies == null) {
+                    showErrorMessage();
+                } else {
+                    showMovies();
+                }
+                mMovieAdapter.setPosters(movies);
+            });
         }
     }
 

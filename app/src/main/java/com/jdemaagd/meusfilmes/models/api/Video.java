@@ -1,4 +1,4 @@
-package com.jdemaagd.meusfilmes.models;
+package com.jdemaagd.meusfilmes.models.api;
 
 public class Video {
 

@@ -16,15 +16,15 @@ public interface MovieDao {
     @Insert
     void addMovie(Movie movie);
 
-    @Query("SELECT * FROM movie WHERE id = :movieId")
+    @Query("SELECT * FROM Movie WHERE id = :movieId")
     LiveData<Movie> getMovieById(int movieId);
 
-    @Query("SELECT * FROM movie")
+    @Query("SELECT * FROM Movie")
     LiveData<List<Movie>> getAllMovies();
 
     @Delete
     void removeMovie(Movie movie);
 
-    @Query("DELETE FROM movie")
+    @Query("DELETE FROM Movie")
     void resetTable();
 }
