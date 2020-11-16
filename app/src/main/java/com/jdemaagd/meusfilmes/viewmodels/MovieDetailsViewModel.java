@@ -3,7 +3,7 @@ package com.jdemaagd.meusfilmes.viewmodels;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.jdemaagd.meusfilmes.data.AppDatabase;
+import com.jdemaagd.meusfilmes.common.AppDatabase;
 import com.jdemaagd.meusfilmes.models.Movie;
 
 public class MovieDetailsViewModel extends ViewModel {

@@ -1,12 +1,12 @@
 package com.jdemaagd.meusfilmes.network;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.jdemaagd.meusfilmes.R;
-import com.jdemaagd.meusfilmes.common.AppConstants;
 import com.jdemaagd.meusfilmes.models.ApiResponse;
 import com.jdemaagd.meusfilmes.models.Movie;
 
@@ -41,12 +41,12 @@ public class MovieRepository {
     private void loadMovies(String sortDescriptor, int page) {
         Call<ApiResponse<Movie>> call = null;
 
-        if (sortDescriptor.equals(AppConstants.POPULARITY_SORT_DESCRIPTOR)) {
+        if (sortDescriptor.equals(mApplication.getString(R.string.sort_popular))) {
             call = apiClient.getPopularMovies(
                     mApplication.getString(R.string.language),
                     String.valueOf(1));
         }
-        if (sortDescriptor.equals(AppConstants.TOP_RATED_SORT_DESCRIPTOR)) {
+        if (sortDescriptor.equals(mApplication.getString(R.string.sort_top_rated))) {
             call = apiClient.getTopRatedMovies(
                     mApplication.getString(R.string.language),
                     String.valueOf(1));
@@ -70,6 +70,7 @@ public class MovieRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<Movie>> call, Throwable t) {
+                Log.d(LOG_TAG, "MovieRepository.loadMovies: network error.");
                 mMovies = null;
             }
         });

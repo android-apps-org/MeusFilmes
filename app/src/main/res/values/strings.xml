@@ -1,14 +1,24 @@
 <resources>
     <string name="app_name">Meus Filmes</string>
 
-    <string name="error_message">
-        An error has occurred. Please try again by clicking REFRESH.
-    </string>
+    <string name="error_message">An error has occurred. Please REFRESH and try again.</string>
+    <string name="network_error">Network Not available. Please try again later.</string>
 
     <string name="action_favorites">Favorites</string>
     <string name="action_popular">Popular</string>
     <string name="action_top_rated">Top Rated</string>
 
     <string name="language">en-US</string>
+
+    <string name="add_favorite">Added to favorites</string>
+    <string name="remove_favorite">Removed from favorites</string>
+
+    <string name="database_name">movie</string>
+
+    <string name="extra_movie_id">MOVIE_ID</string>
+
+    <string name="sort_favorites">favorites</string>
+    <string name="sort_popular">popular</string>
+    <string name="sort_top_rated">top_rated</string>
 
 </resources>

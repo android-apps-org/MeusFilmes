@@ -1,4 +1,4 @@
-package com.jdemaagd.meusfilmes.data;
+package com.jdemaagd.meusfilmes.common;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,7 +8,9 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
-import com.jdemaagd.meusfilmes.common.AppConstants;
+import com.jdemaagd.meusfilmes.R;
+import com.jdemaagd.meusfilmes.data.DateConverter;
+import com.jdemaagd.meusfilmes.data.MovieDao;
 import com.jdemaagd.meusfilmes.models.Movie;
 
 @Database(entities = {Movie.class}, version = 1, exportSchema = false)
@@ -26,7 +28,7 @@ public abstract class AppDatabase extends RoomDatabase {
             synchronized (LOCK) {
                 Log.d(LOG_TAG, "Creating new database instance.");
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
-                        AppDatabase.class, AppConstants.DATABASE_NAME)
+                        AppDatabase.class, context.getString(R.string.database_name))
                         .build();
             }
         }
