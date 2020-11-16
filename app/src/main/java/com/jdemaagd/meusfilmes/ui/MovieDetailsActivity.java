@@ -1,4 +1,4 @@
-package com.jdemaagd.meusfilmes;
+package com.jdemaagd.meusfilmes.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,15 +10,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.jdemaagd.meusfilmes.R;
 import com.jdemaagd.meusfilmes.common.AppConstants;
 import com.jdemaagd.meusfilmes.common.AppDatabase;
-import com.jdemaagd.meusfilmes.common.AppUtils;
 import com.jdemaagd.meusfilmes.databinding.ActivityDetailsMovieBinding;
-import com.jdemaagd.meusfilmes.models.ApiResponse;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.jdemaagd.meusfilmes.common.AppExecutor;
-import com.jdemaagd.meusfilmes.models.api.Review;
-import com.jdemaagd.meusfilmes.models.api.Video;
 import com.jdemaagd.meusfilmes.network.TMDBClient;
 import com.jdemaagd.meusfilmes.network.TMDBService;
 import com.jdemaagd.meusfilmes.viewmodels.MovieDetailsViewModel;
@@ -53,13 +50,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
             mMovieId = intent.getIntExtra(getString(R.string.extra_movie_id), 0);
 
             mIsFav = false;
-            // TODO: reviews and trailers to view
-            // ../id/reviews
-            // ../id/videos
-            //loadReviews();
-            //loadTrailers();
 
-            loadMovie(mApiClient, mMovieId);
+            loadMovie();
         }
     }
 
@@ -78,9 +70,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         });
     }
 
-    private void loadMovie(TMDBClient apiClient, int movieId) {
+    private void loadMovie() {
         if(AppConstants.IS_NETWORK_CONNECTED) {
-            Call<Movie> call = apiClient.getMovieById(movieId);
+            Call<Movie> call = mApiClient.getMovieById(mMovieId);
 
             call.enqueue(new Callback<Movie>() {
                 @Override
@@ -123,24 +115,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
         } else {
             Toast.makeText(MovieDetailsActivity.this, getResources().getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             showErrorMessage();
-        }
-    }
-
-    private void loadReviews() {
-        if (AppUtils.getInstance().isNetworkAvailable(this)) {
-            Call<ApiResponse<Review>> call = mApiClient.getReviews(mMovieId);
-
-        } else {
-            Toast.makeText(MovieDetailsActivity.this, getResources().getString(R.string.network_error), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void loadTrailers() {
-        if (AppUtils.getInstance().isNetworkAvailable(this)) {
-            Call<ApiResponse<Video>> call = mApiClient.getVideos(mMovieId);
-
-        } else {
-            Toast.makeText(MovieDetailsActivity.this, getResources().getString(R.string.network_error), Toast.LENGTH_SHORT).show();
         }
     }
 

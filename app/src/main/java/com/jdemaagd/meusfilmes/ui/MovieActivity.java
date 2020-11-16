@@ -1,4 +1,4 @@
-package com.jdemaagd.meusfilmes;
+package com.jdemaagd.meusfilmes.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jdemaagd.meusfilmes.R;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter.MovieAdapterOnClickHandler;
 import com.jdemaagd.meusfilmes.common.AppConstants;
@@ -36,7 +37,6 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 public class MovieActivity extends AppCompatActivity implements MovieAdapterOnClickHandler {
 
     private static final String LOG_TAG = MovieActivity.class.getSimpleName();
-    private static final String EXTRA_MOVIE_ID = "MOVIE_ID";
 
     private ActivityMovieBinding mBinding;
     private TextView mErrorMessageDisplay;
@@ -60,11 +60,10 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
 
         mMovies = new ArrayList<>();
         mSortDescriptor = AppSettings.getPopularitySortDescriptor(this);
-        mMovieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
 
         setViews();
 
-        loadMovies();
+        loadMovies(1);
     }
 
     /**
@@ -75,7 +74,7 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
     public void onClick(Movie movie) {
         Context context = this;
         Intent movieIntent = new Intent(context, MovieDetailsActivity.class);
-        movieIntent.putExtra(EXTRA_MOVIE_ID, movie.getMovieId());
+        movieIntent.putExtra(getString(R.string.extra_movie_id), movie.getMovieId());
         startActivity(movieIntent);
     }
 
@@ -97,7 +96,7 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
             String favoritesSort = AppSettings.getFavoritesSortDescriptor(this);
             if (!mSortDescriptor.equals(favoritesSort)) {
                 mSortDescriptor = favoritesSort;
-                loadMovies();
+                loadMovies(1);
             }
             return true;
         }
@@ -106,7 +105,7 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
             String popularSort = AppSettings.getPopularitySortDescriptor(this);
             if (!mSortDescriptor.equals(popularSort)) {
                 mSortDescriptor = popularSort;
-                loadMovies();
+                loadMovies(1);
             }
             return true;
         }
@@ -115,7 +114,7 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
             String topRatedSort = AppSettings.getTopRatedSortDescriptor(this);
             if (!mSortDescriptor.equals(topRatedSort)) {
                 mSortDescriptor = topRatedSort;
-                loadMovies();
+                loadMovies(1);
             }
             return true;
         }
@@ -134,8 +133,10 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
         mMovieAdapter = new MovieAdapter(this);
         mRecyclerView.setAdapter(mMovieAdapter);
 
+        mMovieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
+
         mBinding.swipeRefreshLayout.setEnabled(false);
-        mBinding.swipeRefreshLayout.setOnRefreshListener(() -> loadMovies());
+        mBinding.swipeRefreshLayout.setOnRefreshListener(() -> loadMovies(1));
 
         mLoadingIndicator = mBinding.pbLoadingIndicator;
     }
@@ -148,7 +149,7 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
         }
     }
 
-    private void loadMovies() {
+    private void loadMovies(int page) {
         if(AppConstants.IS_NETWORK_CONNECTED)
         {
             if (mSortDescriptor.equals(AppSettings.getFavoritesSortDescriptor(this))) {
