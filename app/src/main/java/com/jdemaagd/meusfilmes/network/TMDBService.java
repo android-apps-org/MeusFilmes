@@ -1,5 +1,7 @@
 package com.jdemaagd.meusfilmes.network;
 
+import android.util.Log;
+
 import com.jdemaagd.meusfilmes.common.AppConstants;
 
 import java.io.IOException;
@@ -26,6 +28,8 @@ public class TMDBService {
                     httpUrl = httpUrl.newBuilder()
                             .addQueryParameter("api_key", AppConstants.API_KEY)
                             .build();
+
+                    Log.d(LOG_TAG, "TMDBService: HTTP Url:" + httpUrl);
 
                     request = request.newBuilder().url(httpUrl).build();
                     return chain.proceed(request);

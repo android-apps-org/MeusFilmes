@@ -22,7 +22,7 @@ public class Movie {
     private String mBackdropPath;
 
     @ColumnInfo(name = "duration")
-    @SerializedName("duration")
+    @SerializedName("runtime")
     private int mDuration;
 
     @ColumnInfo(name = "original_title")
@@ -42,11 +42,11 @@ public class Movie {
     private String mReleaseDate;
 
     @ColumnInfo(name = "synopsis")
-    @SerializedName("synopsis")
+    @SerializedName("overview")
     private String mSynopsis;
 
     @ColumnInfo(name = "user_rating")
-    @SerializedName("user_rating")
+    @SerializedName("vote_average")
     private double mUserRating;
 
     @ColumnInfo(name = "vote_count")
