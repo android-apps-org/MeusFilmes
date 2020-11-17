@@ -1,5 +1,8 @@
 package com.jdemaagd.meusfilmes.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -10,7 +13,17 @@ import com.google.gson.annotations.SerializedName;
 // TODO: separate models for API and database
 
 @Entity(tableName = "movie")
-public class Movie {
+public class Movie implements Parcelable {
+    public static final Parcelable.Creator<Movie> CREATOR
+            = new Parcelable.Creator<Movie>() {
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
 
     @PrimaryKey()
     @ColumnInfo(name = "id")
@@ -60,18 +73,31 @@ public class Movie {
         this.mPosterPath = posterPath;
     }
 
-    public Movie(int movieId, String backdropPath, int duration, String originalTitle, double popularity,
-                       String posterPath, String releaseDate, String synopsis, double userRating, int voteCount) {
-        this.mMovieId = movieId;
-        this.mBackdropPath = backdropPath;
-        this.mDuration = duration;
-        this.mOriginalTitle = originalTitle;
-        this.mPopularity = popularity;
-        this.mPosterPath = posterPath;
-        this.mReleaseDate = releaseDate;
-        this.mSynopsis = synopsis;
-        this.mUserRating = userRating;
-        this.mVoteCount = voteCount;
+    public Movie(int movieId, String backdropPath, int duration, String originalTitle, double popularity, String posterPath,
+                 String releaseDate, String synopsis, double userRating, int voteCount) {
+        mMovieId = movieId;
+        mBackdropPath = backdropPath;
+        mDuration = duration;
+        mOriginalTitle = originalTitle;
+        mPopularity = popularity;
+        mPosterPath = posterPath;
+        mReleaseDate = releaseDate;
+        mSynopsis = synopsis;
+        mUserRating = userRating;
+        mVoteCount = voteCount;
+    }
+
+    @Ignore
+    private Movie(Parcel in) {
+        mMovieId = in.readInt();
+        mBackdropPath = in.readString();
+        mOriginalTitle = in.readString();
+        mPopularity = in.readDouble();
+        mPosterPath = in.readString();
+        mReleaseDate = in.readString();
+        mSynopsis = in.readString();
+        mUserRating = in.readDouble();
+        mVoteCount = in.readInt();
     }
 
     public String getBackdropPath() { return mBackdropPath; }
@@ -93,4 +119,22 @@ public class Movie {
     public double getUserRating() { return mUserRating; }
 
     public int getVoteCount() { return mVoteCount; }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mMovieId);
+        dest.writeString(mBackdropPath);
+        dest.writeString(mOriginalTitle);
+        dest.writeDouble(mPopularity);
+        dest.writeString(mPosterPath);
+        dest.writeString(mReleaseDate);
+        dest.writeString(mSynopsis);
+        dest.writeDouble(mUserRating);
+        dest.writeInt(mVoteCount);
+    }
 }

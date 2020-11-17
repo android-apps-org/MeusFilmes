@@ -15,10 +15,16 @@
 
     <string name="database_name">movie</string>
 
-    <string name="extra_movie_id">MOVIE_ID</string>
+    <string name="extra_movie">MOVIE</string>
 
     <string name="sort_favorites">favorites</string>
     <string name="sort_popular">popular</string>
     <string name="sort_top_rated">top_rated</string>
+
+    <string name="cd_movie_item">Movie Poster</string>
+    <string name="cd_video">Video</string>
+    <string name="cd_favorite">Favorite</string>
+    <string name="cd_more">Expand More</string>
+    <string name="cd_status">Status</string>
 
 </resources>
