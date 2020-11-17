@@ -74,7 +74,7 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
     public void onClick(Movie movie) {
         Context context = this;
         Intent movieIntent = new Intent(context, MovieDetailsActivity.class);
-        movieIntent.putExtra(getString(R.string.extra_movie_id), movie.getMovieId());
+        movieIntent.putExtra(getString(R.string.extra_movie), movie);
         startActivity(movieIntent);
     }
 

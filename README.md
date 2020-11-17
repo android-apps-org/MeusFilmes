@@ -16,3 +16,6 @@
 - Makes background threads run faster (NO)
 - Helps eliminate duplication of zombie activities (YES)
 
+
+android:onClick="@{() -> presenter.onClickFavoriteButton()}"
+
