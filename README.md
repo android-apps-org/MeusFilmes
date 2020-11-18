@@ -17,5 +17,16 @@
 - Helps eliminate duplication of zombie activities (YES)
 
 
-android:onClick="@{() -> presenter.onClickFavoriteButton()}"
+## Layout
+
+- CoordinatorLayout
+  - AppBarLayout
+    - CollapsingToolbarLayout
+      - ImageView
+      - View
+      - Toolbar
+  - NestedScrollView
+    - LinearLayout
+      - includes
+  - FloatingActionButton
 

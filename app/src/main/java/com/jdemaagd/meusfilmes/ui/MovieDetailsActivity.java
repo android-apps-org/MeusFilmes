@@ -15,19 +15,31 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.jdemaagd.meusfilmes.R;
+import com.jdemaagd.meusfilmes.adapters.VideoAdapter;
 import com.jdemaagd.meusfilmes.common.AppConstants;
 import com.jdemaagd.meusfilmes.common.AppDatabase;
 import com.jdemaagd.meusfilmes.databinding.ActivityDetailsMovieBinding;
+import com.jdemaagd.meusfilmes.decorators.HorizontalItemDecorator;
+import com.jdemaagd.meusfilmes.models.ApiResponse;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.jdemaagd.meusfilmes.common.AppExecutor;
+import com.jdemaagd.meusfilmes.models.api.Video;
 import com.jdemaagd.meusfilmes.network.TMDBClient;
 import com.jdemaagd.meusfilmes.network.TMDBService;
 import com.jdemaagd.meusfilmes.viewmodels.MovieDetailsViewModel;
 import com.jdemaagd.meusfilmes.viewmodels.ViewModelFactory;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MovieDetailsActivity extends AppCompatActivity {
 
@@ -40,12 +52,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private boolean mIsFav;
     private Movie mMovie;
     private Target mTargetBackdrop;
+    private VideoAdapter mVideoAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_details_movie);
-        // mBinding.setLifecycleOwner(this);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -64,20 +76,21 @@ public class MovieDetailsActivity extends AppCompatActivity {
             mBinding.setMovie(mMovie);
             mBinding.setPresenter(this);
 
-//            setSupportActionBar(mBinding.toolbar);
-//
-//            if (getSupportActionBar() != null) {
-//                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//            }
-
             mIsFav = false;
 
             loadMovie();
+            loadVideos(savedInstanceState);
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(getString(R.string.bundle_videos), mVideoAdapter.getList());
+    }
+
     private void bindFavIcon() {
-        mBinding.movieDetails.ivFavorite.setOnClickListener((view) -> {
+        mBinding.movieDetails.ivFav.setOnClickListener((view) -> {
             AppExecutor.getInstance().diskIO().execute(() -> {
                 if (mIsFav) {
                     Log.d(LOG_TAG, "Remove movie from database via Room.");
@@ -93,6 +106,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     private void loadMovie() {
         if (mMovie != null) {
+
             mTargetBackdrop = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -111,11 +125,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
                 @Override
                 public void onPrepareLoad(Drawable placeHolderDrawable) {
+
                 }
             };
 
             Picasso.get()
-                    .load("http://image.tmdb.org/t/p/w780" + mMovie.getBackdropPath())
+                    .load(AppConstants.BACKDROP_BASE_URL + mMovie.getBackdropPath())
                     .into(mTargetBackdrop);
 
             mBinding.movieDetails.tvErrorMessage.setText(mMovie.getSynopsis());
@@ -128,15 +143,55 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     .load(AppConstants.POSTER_URL + mMovie.getPosterPath())
                     .placeholder(R.drawable.placeholder)
                     .error(R.drawable.error)
-                    .into(mBinding.movieDetails.ivPosterThumb);
+                    .into(mBinding.movieDetails.ivPoster);
 
             bindFavIcon();
             setFavIcon();
         } else {
+            Log.d(LOG_TAG, getString(R.string.network_error));
             Toast.makeText(MovieDetailsActivity.this, getResources().getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             showErrorMessage();
         }
+    }
 
+    private void loadVideos(Bundle savedInstanceState) {
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mBinding.movieVideos.videosList.setLayoutManager(layoutManager);
+        mBinding.movieVideos.videosList.setHasFixedSize(true);
+        mBinding.movieVideos.videosList.setNestedScrollingEnabled(false);
+
+        RecyclerView.ItemDecoration itemDecoration = new HorizontalItemDecorator(this);
+        mBinding.movieVideos.videosList.addItemDecoration(itemDecoration);
+
+        mVideoAdapter = new VideoAdapter(this);
+        mBinding.movieVideos.videosList.setAdapter(mVideoAdapter);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(getString(R.string.bundle_videos))) {
+            mVideoAdapter.addVideosList(savedInstanceState.getParcelableArrayList(getString(R.string.bundle_videos)));
+        } else {
+            Call<ApiResponse<Video>> call = mApiClient.getVideos(mMovie.getMovieId());
+
+            call.enqueue(new Callback<ApiResponse<Video>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Video>> call,
+                                       Response<ApiResponse<Video>> response) {
+                    List<Video> result = response.body().results;
+                    mVideoAdapter.addVideosList(result);
+                    if (result.size() == 0) {
+                        mBinding.movieVideos.videosLabel.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<Video>> call, Throwable t) {
+                    Log.d(LOG_TAG, getString(R.string.network_error));
+                    Toast.makeText(MovieDetailsActivity.this,
+                            getString(R.string.network_error), Toast.LENGTH_LONG).show();
+                    showErrorMessage();
+                }
+            });
+        }
     }
 
     private void setFavIcon() {
@@ -147,17 +202,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
             Log.d(LOG_TAG, "Receiving LiveData Update.");
             if (favMovie == null) {
                 mIsFav = false;
-                mBinding.movieDetails.ivFavorite.setImageResource(R.drawable.ic_heart_border_pink_24dp);
+                mBinding.movieDetails.ivFav.setImageResource(R.drawable.ic_heart_border_pink_24dp);
             } else {
                 mIsFav = true;
-                mBinding.movieDetails.ivFavorite.setImageResource(R.drawable.ic_heart_pink_24dp);
+                mBinding.movieDetails.ivFav.setImageResource(R.drawable.ic_heart_pink_24dp);
             }
         });
     }
 
     private void showErrorMessage() {
-        mBinding.movieDetails.ivFavorite.setVisibility(View.INVISIBLE);
-        mBinding.movieDetails.ivPosterThumb.setVisibility(View.INVISIBLE);
+        mBinding.movieDetails.ivFav.setVisibility(View.INVISIBLE);
+        mBinding.movieDetails.ivPoster.setVisibility(View.INVISIBLE);
         mBinding.movieDetails.tvOriginalTitle.setVisibility(View.INVISIBLE);
         mBinding.movieDetails.tvOverview.setVisibility(View.INVISIBLE);
         mBinding.movieDetails.tvReleaseDate.setVisibility(View.INVISIBLE);

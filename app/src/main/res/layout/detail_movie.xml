@@ -33,7 +33,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/iv_poster_thumb"
+            android:id="@+id/iv_poster"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -49,8 +49,8 @@
             android:textColor="@color/light_blue"
             android:textSize="28dp"
             android:fontFamily="sans-serif-medium"
-            app:layout_constraintStart_toEndOf="@+id/iv_poster_thumb"
-            app:layout_constraintTop_toTopOf="@+id/iv_poster_thumb" />
+            app:layout_constraintStart_toEndOf="@+id/iv_poster"
+            app:layout_constraintTop_toTopOf="@+id/iv_poster" />
 
         <TextView
             android:id="@+id/tv_vote_average"
@@ -61,17 +61,17 @@
             android:textColor="@color/light_blue"
             android:textSize="17dp"
             android:fontFamily="sans-serif-light"
-            app:layout_constraintStart_toEndOf="@+id/iv_poster_thumb"
+            app:layout_constraintStart_toEndOf="@+id/iv_poster"
             app:layout_constraintTop_toBottomOf="@+id/tv_release_date" />
 
         <ImageView
-            android:id="@+id/iv_favorite"
+            android:id="@+id/iv_fav"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="40dp"
             android:layout_marginBottom="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_poster_thumb" />
+            app:layout_constraintBottom_toBottomOf="@+id/iv_poster" />
 
         <TextView
             android:id="@+id/tv_overview"
@@ -85,7 +85,7 @@
             android:fontFamily="sans-serif"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iv_poster_thumb" />
+            app:layout_constraintTop_toBottomOf="@+id/iv_poster" />
 
         <TextView
             android:id="@+id/tv_error_message"
