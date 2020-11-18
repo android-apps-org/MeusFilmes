@@ -22,7 +22,7 @@ import java.util.List;
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
 
     private final Context mContext;
-    private List<Video> mList;
+    private List<Video> mVideos;
 
     public VideoAdapter(Context context) {
         this.mContext = context;
@@ -38,25 +38,25 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
     @Override
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
-        Video video = mList.get(position);
+        Video video = mVideos.get(position);
         holder.bind(video);
     }
 
     @Override
     public int getItemCount() {
-        if (mList == null) {
+        if (mVideos == null) {
             return 0;
         }
-        return mList.size();
+        return mVideos.size();
     }
 
     public void addVideosList(List<Video> videosList) {
-        mList = videosList;
+        mVideos = videosList;
         notifyDataSetChanged();
     }
 
     public ArrayList<Video> getList() {
-        return (ArrayList<Video>) mList;
+        return (ArrayList<Video>) mVideos;
     }
 
     public class VideoViewHolder extends RecyclerView.ViewHolder {

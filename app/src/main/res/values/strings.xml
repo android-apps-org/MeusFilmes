@@ -14,20 +14,33 @@
 
     <string name="language">en-US</string>
 
+    <string name="database_name">movie</string>
     <string name="add_favorite">Added to favorites</string>
     <string name="remove_favorite">Removed from favorites</string>
 
-    <string name="database_name">movie</string>
-
-    <string name="extra_movie">MOVIE</string>
-
+    <!-- content description -->
     <string name="cd_movie_item">Movie Poster</string>
     <string name="cd_video">Video</string>
+    <string name="cd_more">Expand More</string>
 
+    <string name="view_more">READ MORE</string>
+
+    <string name="review">Review</string>
+    <string name="reviews">Reviews</string>
     <string name="trailers">Trailers</string>
 
     <string name="movie_transition" translatable="false">movie_transition</string>
+    <string name="review_transition" translatable="false">review_transition</string>
 
+    <!-- bundle/intent keys -->
+    <string name="bundle_reviews">REVIEWS</string>
     <string name="bundle_videos">VIDEOS</string>
+    <string name="intent_extra_movie">MOVIE</string>
+    <string name="intent_extra_movie_number">MOVIE_NUMBER</string>
+    <string name="intent_extra_movie_title">MOVIE_TITLE</string>
+    <string name="intent_extra_review">REVIEW</string>
+    <string name="intent_extra_color_actionbar">COLOR_ACTIONBAR</string>
+
+    <string name="pref_changed_movie" translatable="false">changed_movie</string>
 
 </resources>

@@ -10,23 +10,28 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.view.ViewCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.jdemaagd.meusfilmes.R;
+import com.jdemaagd.meusfilmes.adapters.ReviewAdapter;
 import com.jdemaagd.meusfilmes.adapters.VideoAdapter;
 import com.jdemaagd.meusfilmes.common.AppConstants;
 import com.jdemaagd.meusfilmes.common.AppDatabase;
+import com.jdemaagd.meusfilmes.common.AppExecutor;
+import com.jdemaagd.meusfilmes.common.AppSettings;
 import com.jdemaagd.meusfilmes.databinding.ActivityDetailsMovieBinding;
 import com.jdemaagd.meusfilmes.decorators.HorizontalItemDecorator;
 import com.jdemaagd.meusfilmes.models.ApiResponse;
 import com.jdemaagd.meusfilmes.models.Movie;
-import com.jdemaagd.meusfilmes.common.AppExecutor;
+import com.jdemaagd.meusfilmes.models.api.Review;
 import com.jdemaagd.meusfilmes.models.api.Video;
 import com.jdemaagd.meusfilmes.network.TMDBClient;
 import com.jdemaagd.meusfilmes.network.TMDBService;
@@ -47,11 +52,15 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     private TMDBClient mApiClient;
     private AppDatabase mAppDatabase;
+    private AppExecutor mAppExecutor;
     private ActivityDetailsMovieBinding mBinding;
     private int mColor;
     private boolean mIsFav;
     private Movie mMovie;
+    private int mMovieNumber;
     private Target mTargetBackdrop;
+
+    private ReviewAdapter mReviewAdapter;
     private VideoAdapter mVideoAdapter;
 
     @Override
@@ -69,17 +78,26 @@ public class MovieDetailsActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         if (intent != null) {
+            mAppExecutor = AppExecutor.getInstance();
             mApiClient = TMDBService.createService(TMDBClient.class);
             mAppDatabase = AppDatabase.getInstance(getApplicationContext());
-            mMovie = intent.getParcelableExtra(getString(R.string.extra_movie));
+            mMovie = intent.getParcelableExtra(getString(R.string.intent_extra_movie));
+            mMovieNumber = intent.getIntExtra(getString(R.string.intent_extra_movie_number), -1);
 
             mBinding.setMovie(mMovie);
             mBinding.setPresenter(this);
+
+//            setSupportActionBar(mBinding.toolbar);
+//
+//            if (getSupportActionBar() != null) {
+//                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//            }
 
             mIsFav = false;
 
             loadMovie();
             loadVideos(savedInstanceState);
+            loadReviews(savedInstanceState);
         }
     }
 
@@ -87,21 +105,45 @@ public class MovieDetailsActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(getString(R.string.bundle_videos), mVideoAdapter.getList());
+        outState.putParcelableArrayList(getString(R.string.bundle_reviews), mReviewAdapter.getList());
     }
 
-    private void bindFavIcon() {
-        mBinding.movieDetails.ivFav.setOnClickListener((view) -> {
-            AppExecutor.getInstance().diskIO().execute(() -> {
-                if (mIsFav) {
-                    Log.d(LOG_TAG, "Remove movie from database via Room.");
+    public void onClickExpand(View view, Review review) {
+        Intent intent = new Intent(this, MovieReviewActivity.class);
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(this, view, ViewCompat.getTransitionName(view));
+        intent.putExtra(getString(R.string.intent_extra_review), review);
+        intent.putExtra(getString(R.string.intent_extra_movie_title), mMovie.getOriginalTitle());
+        intent.putExtra(getString(R.string.intent_extra_color_actionbar), mColor);
+        startActivity(intent, options.toBundle());
+    }
+
+    public void onClickFavoriteButton() {
+        AppSettings.setChangedMovie(this, mMovieNumber);
+
+        String snackBarText;
+        if (mIsFav) {
+            mAppExecutor.diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppDatabase.movieDao().removeMovie(mMovie);
-                } else {
-                    Log.d(LOG_TAG, "Insert movie into database via Room.");
+                }
+            });
+            mIsFav = false;
+            mBinding.favBtn.setImageResource(R.drawable.ic_heart_border_pink_24dp);
+            snackBarText = getString(R.string.remove_favorite);
+        } else {
+            mAppExecutor.diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppDatabase.movieDao().addMovie(mMovie);
                 }
-                runOnUiThread(() -> setFavIcon());
             });
-        });
+            mIsFav = true;
+            mBinding.favBtn.setImageResource(R.drawable.ic_heart_pink_24dp);
+            snackBarText = getString(R.string.add_favorite);
+        }
+        Snackbar.make(mBinding.coordinatorLayout, snackBarText, Snackbar.LENGTH_SHORT).show();
     }
 
     private void loadMovie() {
@@ -145,12 +187,52 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     .error(R.drawable.error)
                     .into(mBinding.movieDetails.ivPoster);
 
-            bindFavIcon();
+            mBinding.favBtn.setImageResource(R.drawable.ic_heart_border_pink_24dp);
             setFavIcon();
         } else {
             Log.d(LOG_TAG, getString(R.string.network_error));
             Toast.makeText(MovieDetailsActivity.this, getResources().getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             showErrorMessage();
+        }
+    }
+
+    private void loadReviews(Bundle savedInstanceState) {
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mBinding.movieReviews.reviewsList.setLayoutManager(layoutManager);
+        mBinding.movieReviews.reviewsList.setHasFixedSize(true);
+        mBinding.movieReviews.reviewsList.setNestedScrollingEnabled(false);
+
+        RecyclerView.ItemDecoration itemDecoration = new HorizontalItemDecorator(this);
+        mBinding.movieReviews.reviewsList.addItemDecoration(itemDecoration);
+
+        mReviewAdapter = new ReviewAdapter(this);
+        mBinding.movieReviews.reviewsList.setAdapter(mReviewAdapter);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(getString(R.string.bundle_reviews))) {
+            mReviewAdapter.addReviewsList(savedInstanceState.<Review>getParcelableArrayList(getString(R.string.bundle_reviews)));
+        } else {
+            Call<ApiResponse<Review>> call = mApiClient.getReviews(mMovie.getMovieId());
+
+            call.enqueue(new Callback<ApiResponse<Review>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Review>> call,
+                                       Response<ApiResponse<Review>> response) {
+                    List<Review> result = response.body().results;
+                    mReviewAdapter.addReviewsList(result);
+                    if (result.size() == 0) {
+                        mBinding.movieReviews.reviewsLabel.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<Review>> call, Throwable t) {
+                    Log.d(LOG_TAG, getString(R.string.network_error));
+                    Toast.makeText(MovieDetailsActivity.this,
+                            getString(R.string.network_error), Toast.LENGTH_LONG).show();
+                    showErrorMessage();
+                }
+            });
         }
     }
 
@@ -202,16 +284,15 @@ public class MovieDetailsActivity extends AppCompatActivity {
             Log.d(LOG_TAG, "Receiving LiveData Update.");
             if (favMovie == null) {
                 mIsFav = false;
-                mBinding.movieDetails.ivFav.setImageResource(R.drawable.ic_heart_border_pink_24dp);
+                mBinding.favBtn.setImageResource(R.drawable.ic_heart_border_pink_24dp);
             } else {
                 mIsFav = true;
-                mBinding.movieDetails.ivFav.setImageResource(R.drawable.ic_heart_pink_24dp);
+                mBinding.favBtn.setImageResource(R.drawable.ic_heart_pink_24dp);
             }
         });
     }
 
     private void showErrorMessage() {
-        mBinding.movieDetails.ivFav.setVisibility(View.INVISIBLE);
         mBinding.movieDetails.ivPoster.setVisibility(View.INVISIBLE);
         mBinding.movieDetails.tvOriginalTitle.setVisibility(View.INVISIBLE);
         mBinding.movieDetails.tvOverview.setVisibility(View.INVISIBLE);

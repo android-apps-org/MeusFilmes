@@ -1,24 +1,41 @@
 package com.jdemaagd.meusfilmes.models.api;
 
-public class Review {
+import android.os.Parcel;
+import android.os.Parcelable;
 
-    private String mAuthor;
-    private String mContent;
-    private String mReviewId;
-    private String mUrl;
+import com.google.gson.annotations.SerializedName;
 
-    public Review(String author, String content, String reviewId, String url) {
-        mAuthor = author;
-        mContent = content;
-        mReviewId = reviewId;
-        mUrl = url;
+public class Review implements Parcelable {
+    public static final Parcelable.Creator<Review> CREATOR
+            = new Parcelable.Creator<Review>() {
+        public Review createFromParcel(Parcel in) {
+            return new Review(in);
+        }
+
+        public Review[] newArray(int size) {
+            return new Review[size];
+        }
+    };
+
+    @SerializedName("author")
+    public String author;
+
+    @SerializedName("content")
+    public String content;
+
+    private Review(Parcel in) {
+        author = in.readString();
+        content = in.readString();
     }
 
-    public String getAuthor() { return mAuthor; }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
-    public String getContent() { return mContent; }
-
-    public String getReviewId() { return mReviewId; }
-
-    public String getUrl() { return mUrl; }
+    @Override
+    public void writeToParcel(Parcel dest, int i) {
+        dest.writeString(author);
+        dest.writeString(content);
+    }
 }
