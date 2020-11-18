@@ -54,6 +54,12 @@
                     android:layout_height="@dimen/app_bar_scrim_height"
                     android:layout_gravity="bottom"
                     android:background="@drawable/scrim" />
+                
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    app:layout_collapseMode="pin" />
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -82,9 +88,24 @@
                     android:id="@+id/movie_videos"
                     layout="@layout/detail_video" />
 
+                <include
+                    android:id="@+id/movie_reviews"
+                    layout="@layout/detail_review" />
+
             </LinearLayout>
 
         </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fav_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_medium"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="@{() -> presenter.onClickFavoriteButton()}"
+            app:layout_anchor="@+id/appbar"
+            app:layout_anchorGravity="end|right|bottom" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
