@@ -1,28 +1,41 @@
 package com.jdemaagd.meusfilmes.models.api;
 
-public class Video {
+import android.os.Parcel;
+import android.os.Parcelable;
 
-    private String mKey;
-    private String mName;
-    private int mSize;
-    private String mType;
-    private String mVideoId;
+import com.google.gson.annotations.SerializedName;
 
-    public Video(String key, String name, int size, String type, String videoId) {
-        mKey = key;
-        mName = name;
-        mSize = size;
-        mType = type;
-        mVideoId = videoId;
+public class Video implements Parcelable {
+    public static final Parcelable.Creator<Video> CREATOR
+            = new Parcelable.Creator<Video>() {
+        public Video createFromParcel(Parcel in) {
+            return new Video(in);
+        }
+
+        public Video[] newArray(int size) {
+            return new Video[size];
+        }
+    };
+
+    @SerializedName("key")
+    public String videoUrl;
+
+    @SerializedName("name")
+    public String videoName;
+
+    private Video(Parcel in) {
+        videoUrl = in.readString();
+        videoName = in.readString();
     }
 
-    public String getKey() { return mKey; }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
-    public String getName() { return mName; }
-
-    public int getSize() { return mSize; }
-
-    public String getType() { return mType; }
-
-    public String getVideoId() { return mVideoId; }
+    @Override
+    public void writeToParcel(Parcel dest, int i) {
+        dest.writeString(videoUrl);
+        dest.writeString(videoName);
+    }
 }
