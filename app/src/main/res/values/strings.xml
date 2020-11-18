@@ -8,6 +8,10 @@
     <string name="action_popular">Popular</string>
     <string name="action_top_rated">Top Rated</string>
 
+    <string name="sort_favorites">favorites</string>
+    <string name="sort_popular">popular</string>
+    <string name="sort_top_rated">top_rated</string>
+
     <string name="language">en-US</string>
 
     <string name="add_favorite">Added to favorites</string>
@@ -17,14 +21,13 @@
 
     <string name="extra_movie">MOVIE</string>
 
-    <string name="sort_favorites">favorites</string>
-    <string name="sort_popular">popular</string>
-    <string name="sort_top_rated">top_rated</string>
-
     <string name="cd_movie_item">Movie Poster</string>
     <string name="cd_video">Video</string>
-    <string name="cd_favorite">Favorite</string>
-    <string name="cd_more">Expand More</string>
-    <string name="cd_status">Status</string>
+
+    <string name="trailers">Trailers</string>
+
+    <string name="movie_transition" translatable="false">movie_transition</string>
+
+    <string name="bundle_videos">VIDEOS</string>
 
 </resources>
