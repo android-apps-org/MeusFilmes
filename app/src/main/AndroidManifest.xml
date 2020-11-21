@@ -26,6 +26,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MovieActivity" />
         </activity>
+        <activity
+            android:name=".ui.MovieReviewActivity"
+            android:parentActivityName=".ui.MovieDetailsActivity"
+            android:launchMode="singleTask">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.MovieDetailsActivity" />
+        </activity>
     </application>
 
 </manifest>

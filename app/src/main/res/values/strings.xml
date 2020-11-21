@@ -21,9 +21,10 @@
     <!-- content description -->
     <string name="cd_movie_item">Movie Poster</string>
     <string name="cd_video">Video</string>
-    <string name="cd_more">Expand More</string>
 
-    <string name="view_more">READ MORE</string>
+    <!-- labels -->
+    <string name="rating">Rating: </string>
+    <string name="release_date">Release Date: </string>
 
     <string name="review">Review</string>
     <string name="reviews">Reviews</string>

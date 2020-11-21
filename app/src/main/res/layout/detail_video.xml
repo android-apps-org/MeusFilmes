@@ -4,7 +4,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <TextView
             android:id="@+id/videosLabel"
@@ -18,7 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="@+id/videosLabel"
-            app:layout_constraintTop_toBottomOf="@+id/videosLabel" />
+            app:layout_constraintTop_toBottomOf="@+id/videosLabel"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

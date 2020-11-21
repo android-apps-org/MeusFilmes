@@ -34,10 +34,8 @@
                 android:layout_marginTop="@dimen/margin_medium"
                 android:singleLine="true"
                 android:text="@{review.author}"
-                android:textColor="?attr/colorOnPrimary"
+                android:textColor="@color/midnight_blue"
                 android:textSize="@dimen/review_author_text_size"
-                android:transitionName="@string/review_transition"
-                tools:ignore="UnusedAttribute"
                 tools:text="Jon DeMaagd" />
 
             <TextView
@@ -54,46 +52,8 @@
                 android:maxLines="10"
                 android:minHeight="@dimen/review_content_height"
                 android:text="@{review.content}"
-                android:textColor="?attr/colorOnPrimary"
                 android:textSize="@dimen/review_content_text_size"
                 tools:text="There is movie review" />
-
-            <View
-                android:id="@+id/divider"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_below="@id/tv_content"
-                android:layout_marginTop="@dimen/margin_medium"
-                android:background="@color/dividerColor" />
-
-            <TextView
-                android:id="@+id/tv_view_more"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/review_view_more_height"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@id/divider"
-                android:layout_marginLeft="@dimen/margin_medium"
-                android:layout_marginStart="@dimen/margin_medium"
-                android:layout_toLeftOf="@id/iv_expand"
-                android:layout_toStartOf="@id/iv_expand"
-                android:gravity="center_vertical"
-                android:onClick="@{() -> presenter.onClickExpand(tvAuthor, review)}"
-                android:text="@string/view_more"
-                android:textAppearance="@style/TextAppearance.AppCompat.Button"
-                android:textColor="?attr/colorOnPrimary" />
-
-            <ImageView
-                android:id="@+id/iv_expand"
-                android:layout_width="@dimen/image_size"
-                android:layout_height="@dimen/image_size"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_below="@id/divider"
-                android:contentDescription="@string/cd_more"
-                android:onClick="@{(view) -> presenter.onClickExpand(view, review)}"
-                android:padding="@dimen/image_padding"
-                app:srcCompat="@drawable/ic_chevron_right_black_24dp" />
 
         </RelativeLayout>
 
