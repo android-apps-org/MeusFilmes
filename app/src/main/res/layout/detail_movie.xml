@@ -42,27 +42,33 @@
             app:layout_constraintTop_toBottomOf="@+id/tv_original_title" />
 
         <TextView
-            android:id="@+id/tv_release_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/tv_release_date_label"
+            android:layout_marginTop="8dp"
             android:layout_marginStart="26dp"
-            android:textColor="@color/light_blue"
-            android:textSize="28dp"
-            android:fontFamily="sans-serif-medium"
+            android:text="@string/release_date"
             app:layout_constraintStart_toEndOf="@+id/iv_poster"
-            app:layout_constraintTop_toTopOf="@+id/iv_poster" />
+            app:layout_constraintTop_toTopOf="@+id/iv_poster"
+            style="@style/DetailText" />
+
+        <TextView
+            android:id="@+id/tv_release_date"
+            app:layout_constraintStart_toStartOf="@+id/tv_release_date_label"
+            app:layout_constraintTop_toBottomOf="@+id/tv_release_date_label"
+            style="@style/DetailText" />
+
+        <TextView
+            android:id="@+id/tv_rating_label"
+            android:layout_marginTop="16dp"
+            android:text="@string/rating"
+            app:layout_constraintStart_toStartOf="@+id/tv_release_date"
+            app:layout_constraintTop_toBottomOf="@+id/tv_release_date"
+            style="@style/DetailText" />
 
         <TextView
             android:id="@+id/tv_vote_average"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="16dp"
-            android:textColor="@color/light_blue"
-            android:textSize="17dp"
-            android:fontFamily="sans-serif-light"
-            app:layout_constraintStart_toEndOf="@+id/iv_poster"
-            app:layout_constraintTop_toBottomOf="@+id/tv_release_date" />
+            app:layout_constraintStart_toStartOf="@+id/tv_rating_label"
+            app:layout_constraintTop_toBottomOf="@+id/tv_rating_label"
+            style="@style/DetailText" />
 
         <TextView
             android:id="@+id/tv_overview"

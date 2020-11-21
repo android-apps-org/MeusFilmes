@@ -4,7 +4,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <TextView
             android:id="@+id/reviewsLabel"
@@ -17,9 +18,9 @@
             android:id="@+id/reviews_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             app:layout_constraintStart_toStartOf="@+id/reviewsLabel"
-            app:layout_constraintTop_toBottomOf="@+id/reviewsLabel" />
+            app:layout_constraintTop_toBottomOf="@+id/reviewsLabel"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
