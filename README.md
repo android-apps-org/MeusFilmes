@@ -30,3 +30,10 @@
       - includes
   - FloatingActionButton
 
+## Resources
+
+- [Shared Element Transitions](https://mikescamell.com/shared-element-transitions-part-1/)
+
+
+java.lang.IllegalArgumentException: Shared element name must not be null
+

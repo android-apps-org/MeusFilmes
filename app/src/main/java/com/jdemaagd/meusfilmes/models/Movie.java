@@ -1,8 +1,10 @@
 package com.jdemaagd.meusfilmes.models;
 
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.RequiresApi;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -10,7 +12,11 @@ import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
 
-// TODO: separate models for API and database
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+
+// TODO: separate models for API and database (doing too much!)
 
 @Entity(tableName = "movie")
 public class Movie implements Parcelable {
@@ -103,6 +109,12 @@ public class Movie implements Parcelable {
     public String getBackdropPath() { return mBackdropPath; }
 
     public int getDuration() { return mDuration; }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public String getFormattedDate() {
+        LocalDate localDate = LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(mReleaseDate));
+        return DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(localDate);
+    }
 
     public int getMovieId() { return mMovieId; }
 

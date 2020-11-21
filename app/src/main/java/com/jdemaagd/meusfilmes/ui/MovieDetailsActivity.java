@@ -11,8 +11,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.view.ViewCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.palette.graphics.Palette;
@@ -108,16 +106,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
         outState.putParcelableArrayList(getString(R.string.bundle_reviews), mReviewAdapter.getList());
     }
 
-    public void onClickExpand(View view, Review review) {
-        Intent intent = new Intent(this, MovieReviewActivity.class);
-        ActivityOptionsCompat options = ActivityOptionsCompat.
-                makeSceneTransitionAnimation(this, view, ViewCompat.getTransitionName(view));
-        intent.putExtra(getString(R.string.intent_extra_review), review);
-        intent.putExtra(getString(R.string.intent_extra_movie_title), mMovie.getOriginalTitle());
-        intent.putExtra(getString(R.string.intent_extra_color_actionbar), mColor);
-        startActivity(intent, options.toBundle());
-    }
-
     public void onClickFavoriteButton() {
         AppSettings.setChangedMovie(this, mMovieNumber);
 
@@ -177,8 +165,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
             mBinding.movieDetails.tvErrorMessage.setText(mMovie.getSynopsis());
             mBinding.movieDetails.tvOriginalTitle.setText(mMovie.getOriginalTitle());
-            mBinding.movieDetails.tvReleaseDate.setText(mMovie.getReleaseDate());
-            mBinding.movieDetails.tvVoteAverage.setText(String.valueOf(mMovie.getUserRating()));
+            mBinding.movieDetails.tvReleaseDate.setText(mMovie.getFormattedDate());
+            mBinding.movieDetails.tvVoteAverage.setText(mMovie.getUserRating() + " / 10");
             mBinding.movieDetails.tvOverview.setText(mMovie.getSynopsis());
 
             Picasso.get()
