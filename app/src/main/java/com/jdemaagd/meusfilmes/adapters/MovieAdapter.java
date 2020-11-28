@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.jdemaagd.meusfilmes.R;
-import com.jdemaagd.meusfilmes.common.AppConstants;
 import com.jdemaagd.meusfilmes.models.Movie;
 import com.squareup.picasso.Picasso;
 
@@ -20,6 +19,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
 
+    private final Context mContext;
     private List<Movie> mMovies;
 
     /*
@@ -38,7 +38,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
      * Creates a MovieAdapter
      * @param clickHandler on-click handler for this adapter
      */
-    public MovieAdapter(MovieAdapterOnClickHandler clickHandler) {
+    public MovieAdapter(MovieAdapterOnClickHandler clickHandler, Context context) {
+        mContext = context;
         mClickHandler = clickHandler;
     }
 
@@ -98,7 +99,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         Log.d(LOG_TAG, "Load Movie Poster via Picasso.");
         Picasso.get()
-                .load(AppConstants.POSTER_URL + movie.getPosterPath())
+                .load(mContext.getString(R.string.POSTER_BASE_URL) + movie.getPosterPath())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error)
                 .into(movieViewHolder.mPosterImageView);
