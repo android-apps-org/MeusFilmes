@@ -26,7 +26,7 @@ public class TMDBService {
                     HttpUrl httpUrl = request.url();
 
                     httpUrl = httpUrl.newBuilder()
-                            .addQueryParameter("api_key", AppConstants.API_KEY)
+                            .addQueryParameter("api_key", AppConstants.API_KEY)     // resValue
                             .build();
 
                     Log.d(LOG_TAG, "TMDBService: HTTP Url:" + httpUrl);
@@ -38,7 +38,7 @@ public class TMDBService {
 
     private static Retrofit.Builder builder =
             new Retrofit.Builder()
-                    .baseUrl(AppConstants.BASE_URL)
+                    .baseUrl(AppConstants.BASE_URL)     // resValue??
                     .client(okHttpClient)
                     .addConverterFactory(GsonConverterFactory.create());
 

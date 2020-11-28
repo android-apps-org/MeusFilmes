@@ -15,14 +15,15 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BACKDROP_BASE_URL", BACKDROP_BASE_URL)
         buildConfigField("String", "MOVIES_BASE_URL", MOVIES_BASE_URL)
-        buildConfigField("String", "POSTER_BASE_URL", POSTER_BASE_URL)
         buildConfigField("String", "TMDB_API_KEY", TMDB_API_KEY)
 
-        buildConfigField("String", "YT_INTENT_URI", YT_INTENT_URI)
-        buildConfigField("String", "YT_PHOTO_URL", YT_PHOTO_URL)
-        buildConfigField("String", "YT_VIDEO_URL", YT_VIDEO_URL)
+        resValue("string", "BACKDROP_BASE_URL", BACKDROP_BASE_URL)
+        resValue("string", "POSTER_BASE_URL", POSTER_BASE_URL)
+
+        resValue("string", "YT_INTENT_URI", YT_INTENT_URI)
+        resValue("string", "YT_PHOTO_URL", YT_PHOTO_URL)
+        resValue("string", "YT_VIDEO_URL", YT_VIDEO_URL)
 
     }
 
