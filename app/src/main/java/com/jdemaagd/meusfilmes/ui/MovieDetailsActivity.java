@@ -160,7 +160,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
             };
 
             Picasso.get()
-                    .load(AppConstants.BACKDROP_BASE_URL + mMovie.getBackdropPath())
+                    .load(getString(R.string.BACKDROP_BASE_URL) + mMovie.getBackdropPath())
                     .into(mTargetBackdrop);
 
             mBinding.movieDetails.tvErrorMessage.setText(mMovie.getSynopsis());
@@ -170,7 +170,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
             mBinding.movieDetails.tvOverview.setText(mMovie.getSynopsis());
 
             Picasso.get()
-                    .load(AppConstants.POSTER_URL + mMovie.getPosterPath())
+                    .load(getString(R.string.POSTER_BASE_URL) + mMovie.getPosterPath())
                     .placeholder(R.drawable.placeholder)
                     .error(R.drawable.error)
                     .into(mBinding.movieDetails.ivPoster);

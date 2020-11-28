@@ -1,11 +1,5 @@
 package com.jdemaagd.meusfilmes.ui;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +11,12 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.jdemaagd.meusfilmes.R;
 import com.jdemaagd.meusfilmes.adapters.MovieAdapter;
@@ -130,7 +130,7 @@ public class MovieActivity extends AppCompatActivity implements MovieAdapterOnCl
         mRecyclerView.setLayoutManager(mGridLayoutManager);
         mBinding.rvPosters.addItemDecoration(new GridItemDecorator(this));
 
-        mMovieAdapter = new MovieAdapter(this);
+        mMovieAdapter = new MovieAdapter(this, MovieActivity.this);
         mRecyclerView.setAdapter(mMovieAdapter);
 
         mMovieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);

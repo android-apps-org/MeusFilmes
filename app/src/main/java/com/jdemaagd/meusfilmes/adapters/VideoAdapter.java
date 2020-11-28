@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.jdemaagd.meusfilmes.R;
-import com.jdemaagd.meusfilmes.common.AppConstants;
 import com.jdemaagd.meusfilmes.databinding.ItemVideoBinding;
 import com.jdemaagd.meusfilmes.models.api.Video;
 import com.squareup.picasso.Picasso;
@@ -71,7 +70,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             binding.setVideo(video);
             binding.setPresenter(this);
 
-            String photoUrl = String.format(AppConstants.YT_PHOTO_URL, video.videoUrl);
+            String photoUrl = String.format(mContext.getString(R.string.YT_PHOTO_URL), video.videoUrl);
             Picasso.get()
                     .load(photoUrl)
                     .placeholder(R.drawable.placeholder)
@@ -81,10 +80,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
         public void onClickVideo(String videoUrl) {
             Intent appIntent = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse(AppConstants.YT_INTENT_URI + videoUrl));
+                    Uri.parse(mContext.getString(R.string.YT_INTENT_URI) + videoUrl));
 
             Intent webIntent = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse(AppConstants.YT_VIDEO_URL + videoUrl));
+                    Uri.parse(mContext.getString(R.string.YT_VIDEO_URL) + videoUrl));
             try {
                 mContext.startActivity(appIntent);
             } catch (ActivityNotFoundException ex) {
