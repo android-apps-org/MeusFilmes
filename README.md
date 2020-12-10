@@ -1,39 +1,31 @@
-# [My Movies](https://www.themoviedb.org/)
+# My Movies App
 
-## Device configurations
+## Entry: MovieActivity Design
 
-- Lifecycle events after device is rotated:
-    - onPause, onStop, onDestroy, onCreate, onStart, onResume
-- Some values such as device orientation and screen width
-    - can change at run-time
-    - default behavior is to destroy and re-create activity 
-        - whenever a device configuration changes
+- [DataBinding](https://developer.android.com/topic/libraries/data-binding)
+  - removes findViewById: an expensive operation that requires traversing view hierarchy at runtime
+  - connects layout to activity/fragment at compile-time (layout inflation)
+    - compiler generates helper class (binding class) when activity is created
+    - can access view with generated binding class without any overhead
+- Lifecycle-Aware: ` mBinding.setLifecycleOwner(this) `
+  - components can observe for changes on this Activity
+- LiveData: wrapper around entities
+  - to receive notifications of changes
+  - which trigger updates in UI to reflect the changes
+- Room
+  - used to save/remove favorite movies from movies list
+  - observes changes via ViewModel/LiveData
+- ViewModel: gets list of movies to display in GridView as Poster Images
+  - fetches from [The Movie Database](https://www.themoviedb.org/)
+    - via RetroFit/OkHttp3
+    - sorts by user preferred setting on popularity or top-rated
+  - observes changes via ViewModel/LiveData
 
-## Why use an AsyncTaskLoader for threads bound to an Activity rather than AsyncTask?
+## DetailsActivity
 
-- Delivers the result to the current Activity (YES)
-- Prevents duplication of background tasks (YES)
-- Makes background threads run faster (NO)
-- Helps eliminate duplication of zombie activities (YES)
-
-
-## Layout
-
-- CoordinatorLayout
-  - AppBarLayout
-    - CollapsingToolbarLayout
-      - ImageView
-      - View
-      - Toolbar
-  - NestedScrollView
-    - LinearLayout
-      - includes
-  - FloatingActionButton
-
-## Resources
-
-- [Shared Element Transitions](https://mikescamell.com/shared-element-transitions-part-1/)
-
-
-java.lang.IllegalArgumentException: Shared element name must not be null
+- View details of selected movie
+  - can favorite or un-favorite
+  - updates via Room
+  - observes for changes via ViewModel/LiveData/Room
+    - UI updates to reflect changes
 

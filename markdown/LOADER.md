@@ -85,3 +85,4 @@ implements LoaderCallbacks<Movie>
     mCallback = MovieDetailsActivity.this;
     LoaderManager.getInstance(this).initLoader(loaderId, null, mCallback);
 ```
+
