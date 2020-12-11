@@ -1,14 +1,50 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+    ext {
+        // sdk and tools
+        minSdkVersion = 26
+        targetSdkVersion = 30
+        compiledSdkVersion = 30
+        buildToolsVersion = "30.0.2"
+        gradleVersion = "4.1.1"
+
+        // version
+        versionCode = 1
+        versionName = "1.0.0"
+
+        // app dependencies
+        supportLibraryVersion = "30.0.0"
+        androidxCoreVersion = "1.3.1"
+        androidxPaletteVersion = "1.0.0"
+        appCompatVersion = "1.2.0"
+        constraintLayoutVersion = "2.0.4"
+        firebaseAppIndexingVersion = "10.0.0"
+        gsonVersion = "2.8.5"
+        guanaVersion = "18.0"
+        kotlinVersion = "1.4.20"
+        lifecycleVersion = "2.2.0"
+        materialDesignVersion = "1.2.1"
+        okHttpVersion = "3.10.0"
+        picassoVersion = "2.71828"
+        retrofitVersion = "2.4.0"
+        roomVersion = "2.2.5"
+        stethoVersion = "1.5.1"
+        swipeRefreshLayoutVersion = "1.1.0"
+
+        // testing dependencies
+        androidxJunitVersion = "1.1.2"
+        androidxUIAutomatorVersion = "2.2.0"
+        espressoVersion = "3.3.0"
+        hamcrestVersion = "1.3"
+        junitVersion = "4.+"
+        testRunnerVersion = "1.1.0"
+    }
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+        classpath "com.android.tools.build:gradle:$rootProject.ext.gradleVersion"
     }
 }
 
